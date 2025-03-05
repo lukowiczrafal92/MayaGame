@@ -1,0 +1,6 @@
+[{"Id" : 1, "NameEng" : "Cocoa beans", "IconAtlas" : "ATLAS_ABILITY_2", "IconIndex" : 4},
+{"Id" : 2, "NameEng" : "Obsidian", "IconAtlas" : "ATLAS_ABILITY_2", "IconIndex" : 6},
+{"Id" : 3, "NameEng" : "Jadeite", "IconAtlas" : "ATLAS_ABILITY_2", "IconIndex" : 7},
+{"Id" : 4, "NameEng" : "Turqouise", "IconAtlas" : "ATLAS_ABILITY_2", "IconIndex" : 5},
+{"Id" : 5, "NameEng" : "Salt", "IconAtlas" : "ATLAS_ABILITY_2", "IconIndex" : 3},
+{"Id" : 6, "NameEng" : "Quetzal feathers", "IconAtlas" : "ATLAS_ABILITY_2", "IconIndex" : 2}]

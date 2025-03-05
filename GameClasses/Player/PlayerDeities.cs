@@ -1,0 +1,30 @@
+using BoardGameBackend.GameData;
+using BoardGameBackend.Helpers;
+using BoardGameBackend.Models;
+
+namespace BoardGameBackend.Managers
+{
+    public class PlayerDeity
+    {
+        public int Id {get; set;} = -1;
+        public int Level {get; set;} = 0;
+        public int Resource {get; set;} = -1;
+        public int Luxury {get; set;} = -1;
+        public int TieBreaker {get; set;} = 0;
+    }
+    public class PlayerDeities
+    {
+        public List<PlayerDeity> Deities = new List<PlayerDeity>();
+        public PlayerDeities()
+        {
+          foreach(var db in GameDataManager.GetDeities())
+          {
+            Deities.Add(new PlayerDeity(){Id = db.Id, Resource = db.Resource, Luxury = db.LuxuryId});
+          }
+        }
+        public PlayerDeity GetDeityById(int id)
+        {
+          return Deities.Find(d => d.Id == id);
+        }
+    }
+}

@@ -1,0 +1,6 @@
+[{"Id" : 1, "NameType" : "ACTION_LOCATION", "BackgroundAtlas" : "ATLAS_RULERS_1", "BackgroundIndex" : 3, "StartPerPlayer" : 0},
+{"Id" : 2, "NameType" : "ACTION_STONE_CARVING", "BackgroundAtlas" : "ATLAS_RULERS_1", "BackgroundIndex" : 4, "StartPerPlayer" : 1},
+{"Id" : 3, "NameType" : "ACTION_ASTRONOMY", "BackgroundAtlas" : "ATLAS_RULERS_1", "BackgroundIndex" : 5, "StartPerPlayer" : 1},
+{"Id" : 4, "NameType" : "ACTION_BUILDING", "BackgroundAtlas" : "ATLAS_RULERS_1", "BackgroundIndex" : 6, "StartPerPlayer" : 1},
+{"Id" : 5, "NameType" : "ACTION_PILGRIMAGE", "BackgroundAtlas" : "ATLAS_RULERS_1", "BackgroundIndex" : 7, "StartPerPlayer" : 1},
+{"Id" : 6, "NameType" : "ACTION_WAR", "BackgroundAtlas" : "ATLAS_RULERS_1", "BackgroundIndex" : 8, "StartPerPlayer" : 1}]

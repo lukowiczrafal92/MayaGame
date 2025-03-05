@@ -1,0 +1,6 @@
+[{"Id" : 1, "NameEng" : "Wojownik", "IconAtlas" : "ATLAS_ICONS_1", "IconIndex" : 5, "Color" : "#ec3343", "StartingValue" : 1},
+{"Id" : 2, "NameEng" : "Budowniczy", "IconAtlas" : "ATLAS_ICONS_1", "IconIndex" : 10, "Color" : "#ffc93e", "StartingValue" : 2},
+{"Id" : 3, "NameEng" : "Astronom", "IconAtlas" : "ATLAS_ICONS_1", "IconIndex" : 6, "Color" : "#ff7633", "StartingValue" : 0},
+{"Id" : 4, "NameEng" : "Rzeźbiarz", "IconAtlas" : "ATLAS_ICONS_1", "IconIndex" : 11, "Color" : "#8c5289", "StartingValue" : 0},
+{"Id" : 5, "NameEng" : "Kapłan", "IconAtlas" : "ATLAS_ICONS_1", "IconIndex" : 4, "Color" : "#4fd046", "StartingValue" : 0},
+{"Id" : 6, "NameEng" : "Rolnik", "IconAtlas" : "ATLAS_ICONS_1", "IconIndex" : 7, "Color" : "#58a7d9", "StartingValue" : 2}]

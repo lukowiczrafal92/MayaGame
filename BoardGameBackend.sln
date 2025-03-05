@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardGameBackend", "BoardGameBackend.csproj", "{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|MCD = Debug|MCD
+		Release|Any CPU = Release|Any CPU
+		Release|MCD = Release|MCD
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Debug|MCD.ActiveCfg = Debug|Any CPU
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Debug|MCD.Build.0 = Debug|Any CPU
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Release|MCD.ActiveCfg = Debug|Any CPU
+		{57C02780-FB12-4B1C-8BFC-BF2B7283CEAB}.Release|MCD.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EDD44D94-FCD5-4A71-A929-74829EAFE227}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,6 @@
+﻿[{"Id" : 1, "NameEng" : "Buluc Chabtan", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 1, "Resource" : 1, "LevelFourAtlas" : "ATLAS_ABILITY_2", "LevelFourIndex" : 7, "PatronAtlas" : "ATLAS_ICONS_2", "PatronIndex" : 10, "LuxuryId" : 3},
+{"Id" : 2, "NameEng" : "K'awiil", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 2, "Resource" : 2, "LevelFourAtlas" : "ATLAS_ABILITY_2", "LevelFourIndex" : 5, "PatronAtlas" : "ATLAS_ICONS_2", "PatronIndex" : 11, "LuxuryId" : 4},
+{"Id" : 3, "NameEng" : "Itzamná", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 3, "Resource" : 3, "LevelFourAtlas" : "ATLAS_ABILITY_2", "LevelFourIndex" : 4, "PatronAtlas" : "ATLAS_ICONS_2", "PatronIndex" : 12, "LuxuryId" : 1},
+{"Id" : 4, "NameEng" : "Ek Chuah", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 0, "Resource" : 4, "LevelFourAtlas" : "ATLAS_ABILITY_2", "LevelFourIndex" : 6, "PatronAtlas" : "ATLAS_ICONS_2", "PatronIndex" : 9, "LuxuryId" : 2},
+{"Id" : 5, "NameEng" : "Ixchel", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 5, "Resource" : 5, "LevelFourAtlas" : "ATLAS_ABILITY_2", "LevelFourIndex" : 2, "PatronAtlas" : "ATLAS_ICONS_2", "PatronIndex" : 13, "LuxuryId" : 6},
+{"Id" : 6, "NameEng" : "Chaac", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 4, "Resource" : 6, "LevelFourAtlas" : "ATLAS_ABILITY_2", "LevelFourIndex" : 3, "PatronAtlas" : "ATLAS_ICONS_2", "PatronIndex" : 14, "LuxuryId" : 5}]

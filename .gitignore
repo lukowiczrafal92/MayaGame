@@ -1,0 +1,13 @@
+# Ignore Visual Studio files
+*.csproj.user
+.vscode/
+bin/
+obj/
+*.suo
+*.user
+*.userprefs
+*.tlog
+*.log
+*.vs/
+
+# Ignore Docker files

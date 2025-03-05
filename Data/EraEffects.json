@@ -1,0 +1,11 @@
+[{"Id" : 1, "NameKey" : "Rains of Chaac", "HelpKey" : "Przyrost rolników zwiększony o 3.", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 0, "Enabled" : true},
+{"Id" : 2, "NameKey" : "Sealed fate", "HelpKey" : "Nie można dokonywać respecjalizacji.", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 1, "Enabled" : true},
+{"Id" : 3, "NameKey" : "Reversed order", "HelpKey" : "Odwrotna kolejność. Pierwszy gracz odrzucający kartę będzie ostatni w następnej rundzie.", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 2, "Enabled" : true},
+{"Id" : 4, "NameKey" : "Mercenaries", "HelpKey" : "Odblokowuje akcję specjalną: NAJEMNICY. Wymaga karty akcji MIASTA (przeciwnika). Gracz musi posiadać surowiec luksusowy wskazanego miasta. Koszt: BRAK. Nagroda: po 2 specjalistów wskazanych w mieście.", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 3, "Enabled" : true},
+{"Id" : 5, "NameKey" : "Swift actions", "HelpKey" : "Gracze zaczynają rundy tylko z 5 kartami akcji (nie ma faz wyboru).", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 4, "Enabled" : true},
+{"Id" : 6, "NameKey" : "Eventful", "HelpKey" : "Po 2 wydarzenia zamiast jednego.", "EffectType" : 1, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 5, "Enabled" : true},
+{"Id" : 7, "NameKey" : "Patrons", "HelpKey" : "Nowo zdobyci władcy podnoszą poziom ich patrona o 1.", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 6, "Enabled" : true},
+{"Id" : 8, "NameKey" : "Uneventful", "HelpKey" : "Era bez wydarzeń.", "EffectType" : 1, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 7, "Enabled" : true},
+{"Id" : 9, "NameKey" : "Centralization", "HelpKey" : "Przyrost specjalistów w stolicy jest dwukrotny.", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 8, "Enabled" : true},
+{"Id" : 10, "NameKey" : "Longrange warfare", "HelpKey" : "Ignoruje się obowiązek posiadania miasta obok celu podczas używania akcji Wojny. (Dotyczy to kart WOJNY bądź JOKERÓW. Karty MIASTA zawsze ignorują ten obowiązek.)", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 9, "Enabled" : true},
+{"Id" : 11, "NameKey" : "Raiders", "HelpKey" : "Każda akcja Wojny przynosi 1 dodatkowy żeton łupu.", "EffectType" : 5, "AbilityAtlas" : "ERA_ATLAS_1", "AbilityIndex" : 10, "Enabled" : true}]
