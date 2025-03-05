@@ -51,7 +51,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddSingleton<IAuthService, MongoAuthService>();
 builder.Services.AddSingleton<IHubContextProvider, HubContextProvider>();
-Console.WriteLine($"{config.GetSection("TokenSettings:Secret").Value!}");
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
