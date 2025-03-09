@@ -5,8 +5,9 @@ namespace BoardGameBackend.Helpers
         private static Dictionary<string, string> jsonDictionary = new Dictionary<string, string>();
         
         private static List<string> ChangelogList = new List<string>(){
-            "Release in 2025.",
-            "Powolutku do przodu."
+            "03.2025",
+            "Karty ery: 12.",
+            "Karty wydarzeń: 28."
         };
         static InitJsonManager()
         {   
@@ -45,7 +46,10 @@ namespace BoardGameBackend.Helpers
                 jsonDictionary.Add("Luxuries.json", File.ReadAllText(filePath));  
             filePath = "Data/EraEffects.json";
             if (File.Exists(filePath))
-                jsonDictionary.Add("EraEffects.json", File.ReadAllText(filePath));                               
+                jsonDictionary.Add("EraEffects.json", File.ReadAllText(filePath)); 
+            filePath = "Data/Events.json";
+            if (File.Exists(filePath))
+                jsonDictionary.Add("Events.json", File.ReadAllText(filePath));                                     
         }
         public static Dictionary<string, string> GetJSONDictionary()
         {

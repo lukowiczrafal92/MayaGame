@@ -14,6 +14,8 @@ namespace BoardGameBackend.Managers
         public BoardManager BoardManager { get; set; }
         public PhaseManager PhaseManager { get; set; }
         public ActionManager ActionManager { get; set; }
+        public EventsInGameManager EventsInGameManager { get; set; }
+        public EraEffectManager EraEffectManager { get; set; }
         public TimerManager TimerManager { get; private set; }
         public ActionCardManager ActionCardManager {get; set;}
         public KonstelacjeManager KonstelacjeManager {get; set;}
@@ -33,6 +35,8 @@ namespace BoardGameBackend.Managers
             ActionCardManager = new ActionCardManager(this);
             TimerManager = new TimerManager(this);
             KonstelacjeManager = new KonstelacjeManager(this);
+            EraEffectManager = new EraEffectManager(this);
+            EventsInGameManager = new EventsInGameManager(this);
         }
 
         public void StartGame()
@@ -69,7 +73,9 @@ namespace BoardGameBackend.Managers
                 FullRulerData = fff,
                 PhaseData = PhaseManager.GetPhaseData(),
                 Konstelacje = KonstelacjeManager.GetFullData(),
-                startGameModel = GameOptions
+                startGameModel = GameOptions,
+                EraEffects = EraEffectManager.GetFullData(),
+                EventsLists = EventsInGameManager.GetFullData()
             };
             EventManager.Broadcast("GameStarted", ref data);
             ActionManager.ActionInitialized();

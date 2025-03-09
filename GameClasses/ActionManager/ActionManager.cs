@@ -7,7 +7,7 @@ namespace BoardGameBackend.Managers
 {
     public class ActionManager
     {
-        public bool EraStart = false;
+        public bool RulerDataDirty = false;
         public bool PhaseStarted = false;
         private ActionLogReturn ActionLogReturn = new ActionLogReturn();
         private List<PlayerBasicSetData> playerActionsChange = new List<PlayerBasicSetData>();
@@ -38,7 +38,8 @@ namespace BoardGameBackend.Managers
         private List<ActionTypes> CityCardEnemy = new List<ActionTypes>(){
             ActionTypes.WAR_TRIBUTE,
             ActionTypes.WAR_CONQUEST,
-            ActionTypes.WAR_STAR
+            ActionTypes.WAR_STAR,
+            ActionTypes.ERA_MERCENARIES
         };
         private List<ActionTypes> ActionCardStoneCarving = new List<ActionTypes>(){
             ActionTypes.ERECT_STELAE,
@@ -91,7 +92,7 @@ namespace BoardGameBackend.Managers
             playerActionsChange.Clear();
             gameEvents.Clear();
             ActionLogReturn.Active = false;
-            EraStart = false;
+            RulerDataDirty = false;
             PhaseStarted = false;
         }
 
@@ -120,7 +121,7 @@ namespace BoardGameBackend.Managers
                 return;
             }
 
-            if(EraStart)
+            if(RulerDataDirty)
             {
                 FullRulerData fff = new FullRulerData(){
                 DeckAmount = _gameContext.RulerCardsManager.GetRulersDeckAmount(), 
@@ -261,7 +262,7 @@ namespace BoardGameBackend.Managers
 
             if(tile.dbData.DeityId != -1)
             {
-                if(player.PlayerDeities.GetDeityById(tile.dbData.DeityId).Level >= 3)
+                if(player.PlayerDeities.GetDeityById(tile.dbData.DeityId).Level >= 2)
                     return true;
             }
             return false;
@@ -287,6 +288,9 @@ namespace BoardGameBackend.Managers
             var tile = _gameContext.BoardManager.GetTileById(tileid);
             if(tile == null)
                 return false;
+
+            if(tile.dbData.AdjExtraDeityId == deityid)
+                return true;
             
             foreach(var pTile in _gameContext.BoardManager.GetTilesInRange(tile, 1))
             {
@@ -328,7 +332,7 @@ namespace BoardGameBackend.Managers
                 var jokeraction = GameDataManager.GetActionById(af.JokerActionId);
                 if(jokeraction.RequiresEffectId != -1)
                 {
-                    if(!_gameContext.PlayerManager.HasPlayerAuraEffectId(player, jokeraction.RequiresEffectId));
+                    if(!_gameContext.PlayerManager.HasPlayerAuraEffectId(player, jokeraction.RequiresEffectId))
                         return false;
                 }
 
@@ -497,9 +501,17 @@ namespace BoardGameBackend.Managers
 
                     if(actionCard.Id == 6)
                     {
-                        if(!HasAdjacentCity(tile, player.Id))
+                        if(!HasAdjacentCity(tile, player.Id) && !IsCurrentEraId(10))
                             return false;
                     }
+                }
+                else if(af.ActionId == (int) ActionTypes.ERA_MERCENARIES)
+                {
+                    if(tile.gameData.OwnerId == player.Id || tile.gameData.OwnerId == Guid.Empty)
+                        return false;
+
+                    if(player.PlayerLuxuries.GetLuxuryById(tile.dbData.LuxuryId).Amount == 0)
+                        return false;
                 }
                 else if(af.ActionId == (int) ActionTypes.WAR_CONQUEST)
                 {
@@ -509,7 +521,7 @@ namespace BoardGameBackend.Managers
 
                     if(actionCard.Id == 6)
                     {
-                        if(!HasAdjacentCity(tile, player.Id))
+                        if(!HasAdjacentCity(tile, player.Id) && !IsCurrentEraId(10))
                             return false;
                     }
 
@@ -519,7 +531,7 @@ namespace BoardGameBackend.Managers
                     int iTargetNumCities = _gameContext.BoardManager.GetNumCities(seconplayerid);
                     if(iTargetNumCities < 6)
                     {
-                        if(iTargetNumCities >= _gameContext.BoardManager.GetNumCities(player.Id))
+                        if(iTargetNumCities <= _gameContext.BoardManager.GetNumCities(player.Id))
                             return false;
                     }
                 }
@@ -529,7 +541,7 @@ namespace BoardGameBackend.Managers
                     if(seconplayerid == player.Id || seconplayerid == Guid.Empty)
                         return false;
 
-                    if(actionCard.Id == 6)
+                    if(actionCard.Id == 6 && !IsCurrentEraId(10))
                     {
                         if(!HasAdjacentCity(tile, player.Id))
                             return false;
@@ -548,14 +560,6 @@ namespace BoardGameBackend.Managers
 
                 if(!IsTileValidForDeity(player, af.TileId, af.DeityId))
                     return false;
-            }
-            else if(af.ActionId == (int) ActionTypes.CITY_EXPAND)
-            {
-                
-            }
-            else if(af.ActionId == (int) ActionTypes.FOUND_CITY)
-            {
-
             }
             else if(af.ActionId == (int) ActionTypes.WAR_STAR)
             {
@@ -687,29 +691,35 @@ namespace BoardGameBackend.Managers
                 var tile = _gameContext.BoardManager.GetTileById(af.TileId);
                 _gameContext.PlayerManager.ChangeResourceAmount(player, tile.dbData.Resource1, 1);
                 _gameContext.PlayerManager.ChangeResourceAmount(player, tile.dbData.Resource2, 1);
-                _gameContext.PlayerManager.ChangeWarfareScore(player, 1);
+                _gameContext.PlayerManager.ChangeWarfareScore(player, GetWarfareScoreFromTribute());
             }
             else if(af.ActionId == (int) ActionTypes.WAR_CONQUEST)
             {
                 _gameContext.BoardManager.CityFoundOrConquest(player, af.TileId);
-                _gameContext.PlayerManager.ChangeWarfareScore(player, 2);
+                _gameContext.PlayerManager.ChangeWarfareScore(player, GetWarfareScoreFromConquest());
             }
             else if(af.ActionId == (int) ActionTypes.WAR_STAR)
             {
                 if(af.ExtraInfoTypeId == 1)
                 {
                     _gameContext.PlayerManager.IncreaseDeityLevel(player, af.ExtraInfoId);
-                    _gameContext.PlayerManager.ChangeWarfareScore(player, 3);
+                    _gameContext.PlayerManager.ChangeWarfareScore(player, GetWarfareScoreFromStarWar());
                 }
                 else if(af.ExtraInfoTypeId == 2)
                 {
                     _gameContext.PlayerManager.CheckAngle(player, af.ExtraInfoId);
-                    _gameContext.PlayerManager.ChangeWarfareScore(player, 3);
+                    _gameContext.PlayerManager.ChangeWarfareScore(player, GetWarfareScoreFromStarWar());
                 }
                 else if(af.ExtraInfoTypeId == 3)
                 {
-                    _gameContext.PlayerManager.ChangeWarfareScore(player, 5);
+                    _gameContext.PlayerManager.ChangeWarfareScore(player, 2 + GetWarfareScoreFromStarWar());
                 }
+            }
+            else if(af.ActionId == (int) ActionTypes.ERA_MERCENARIES)
+            {
+                var tile = _gameContext.BoardManager.GetTileById(af.TileId);
+                _gameContext.PlayerManager.ChangeResourceAmount(player, tile.dbData.Resource1, 2);
+                _gameContext.PlayerManager.ChangeResourceAmount(player, tile.dbData.Resource2, 2);
             }
             ConvertFormIntoActionLog(player, af);
             _gameContext.PlayerManager.UsedActionCardFromHand(player, af.CardId);
@@ -778,6 +788,9 @@ namespace BoardGameBackend.Managers
         }
         public bool ConvertResourceDuringExtraPhase(int id, PlayerInGame player)
         {
+            if(IsCurrentEraId(2))
+                return false;
+
             foreach(var resource in player.PlayerResources.Resources)
             {
                 if(resource.Converters.Contains(id))
@@ -828,6 +841,31 @@ namespace BoardGameBackend.Managers
             _gameContext.PlayerManager.TrimResourceOverStorage(player);
             _gameContext.PhaseManager.PlayerFinishedCurrentPhase(player);
             return true;
+        }
+
+        public bool IsCurrentEraId(int iCheck)
+        {
+            return iCheck == _gameContext.EraEffectManager.CurrentAgeCardId;
+        }
+        public int GetExtraWarfareScore()
+        {
+            int iExtra = 0;
+            if(IsCurrentEraId(11))
+                iExtra++;
+
+            return iExtra;
+        }
+        public int GetWarfareScoreFromTribute()
+        {
+            return 1 + GetExtraWarfareScore();
+        }
+        public int GetWarfareScoreFromConquest()
+        {
+            return 2 + GetExtraWarfareScore();
+        }
+        public int GetWarfareScoreFromStarWar()
+        {
+            return 3 + GetExtraWarfareScore();
         }
     }
 }

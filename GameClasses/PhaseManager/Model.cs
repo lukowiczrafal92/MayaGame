@@ -16,7 +16,8 @@ namespace BoardGameBackend.Models
         ActionsStart,
         ActionsEnd,
         PreEndGameChecks,
-        EndScoreConverting
+        EndScoreConverting,
+        InGameEvent
     }
     public class PhaseData
     {

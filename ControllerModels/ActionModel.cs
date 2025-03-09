@@ -62,6 +62,7 @@ namespace BoardGameBackend.Models
         JOKER_CARVER,
         JOKER_ASTRONOM,
         JOKER_PRIEST,
-        SKY_RULER_STAR
+        SKY_RULER_STAR,
+        ERA_MERCENARIES
     }
 }

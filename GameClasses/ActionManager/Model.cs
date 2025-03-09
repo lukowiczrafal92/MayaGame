@@ -20,19 +20,23 @@ namespace BoardGameBackend.Models
         Constellation,
         StelaeToken,
         Luxury,
-        AuraEffect
+        AuraEffect,
+        BoardRotation,
+        RemoveAuraEffect
     }
 
     public enum PlayerTableType
     {
         EraWarfareScore,
         EraLuxuryScore,
-        EraCapitalScore
+        EraCapitalScore,
+        SimpleScore
     }
     public enum GameEventSendType
     {
         EraEnd,
-        EraStart
+        EraStart,
+        GenericEvent
     }
 
     public class PlayerTableRow
@@ -50,6 +54,7 @@ namespace BoardGameBackend.Models
         public GameEventPlayerTable? gameEventPlayerTable {get; set;}
         public GameEventPlayerTable? gameEventPlayerTableTwo {get; set;}
         public GameEventPlayerTable? gameEventPlayerTableThird {get; set;}
+        public int IntValue1 {get; set;}
     }
 
     public class GameEventPlayerTable

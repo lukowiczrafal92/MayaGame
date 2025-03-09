@@ -11,6 +11,8 @@ namespace BoardGameBackend.Models
         public required ActionCardsPlayerData PlayerActionCards {get; set;}
         public required List<KonstelacjaSendInfo> Konstelacje {get; set;}
         public required StartGameModel startGameModel {get; set;}
+        public required List<int> EraEffects {get; set;}
+        public required List<List<int>> EventsLists {get; set;}
     }
 
     public class FullRulerData

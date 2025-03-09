@@ -20,6 +20,8 @@ namespace BoardGameBackend.GameData
         private static List<ActionGameData> lActions = new List<ActionGameData>();
         private static List<KonstelacjaGameData> lKonstelacje = new List<KonstelacjaGameData>();
         private static List<LuxuryGameData> lLuxuries = new List<LuxuryGameData>();
+        private static List<EraEffectGameData> lEraEffects = new List<EraEffectGameData>();
+        private static List<EventGameData> lEvents = new List<EventGameData>();
 
         static GameDataManager()
         {            
@@ -56,6 +58,12 @@ namespace BoardGameBackend.GameData
             fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data/Luxuries.json");
             jsonData = File.ReadAllText(fullPath);
             lLuxuries = JsonConvert.DeserializeObject<List<LuxuryGameData>>(jsonData);
+            fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data/EraEffects.json");
+            jsonData = File.ReadAllText(fullPath);
+            lEraEffects = JsonConvert.DeserializeObject<List<EraEffectGameData>>(jsonData);
+            fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data/Events.json");
+            jsonData = File.ReadAllText(fullPath);
+            lEvents = JsonConvert.DeserializeObject<List<EventGameData>>(jsonData);
         }
         
         public static DeityGameData GetDeityById(int id){
@@ -77,8 +85,20 @@ namespace BoardGameBackend.GameData
         public static ResourceConverterGameData GetResourceConverterById(int id){
             return lResourceConverters.FirstOrDefault(tile => tile.Id == id)!;
         }
+        public static EventGameData GetEventById(int id){
+            return lEvents.FirstOrDefault(action => action.Id == id)!;
+        }
+        public static EraEffectGameData GetEraEffectById(int id){
+            return lEraEffects.FirstOrDefault(action => action.Id == id)!;
+        }
         public static List<KonstelacjaGameData> GetKonstelacje(){
             return lKonstelacje;
+        }
+        public static List<EraEffectGameData> GetEraEffects(){
+            return lEraEffects;
+        }
+        public static List<EventGameData> GetEvents(){
+            return lEvents;
         }
         public static List<ActionCardGameData> GetActionCards(){
             return lActionCards;

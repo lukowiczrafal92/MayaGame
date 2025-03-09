@@ -23,8 +23,9 @@ namespace BoardGameBackend.Managers
         }
         public void OnAgeStart()
         {
+            _gameContext.ActionManager.RulerDataDirty = true;
             _availablepool.Clear();
-            int iPoolBasedOnPlayers = cPerPlayers[_gameContext.PlayerManager.Players.Count()];
+            int iPoolBasedOnPlayers = cPerPlayers[_gameContext.PlayerManager.Players.Count - 1];
             for(int i = 0; i < iPoolBasedOnPlayers; i++)
             {
                 if(_deck.Count() > 0)
@@ -68,8 +69,8 @@ namespace BoardGameBackend.Managers
             {
                player.Rulers.Add(newruler);
                _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.RulerCard, Player = player.Id, Value1 = newruler.dbInfo.Id, Value2 = 1});
-               _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.StelaeToken, Player = player.Id, Value1 = tileid, Value2 = rulerid});
-               _gameContext.BoardManager.GetTileById(tileid).gameData.RulerStelae = rulerid;
+               _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.StelaeToken, Player = player.Id, Value1 = tileid, Value2 = newruler.dbInfo.Id});
+               _gameContext.BoardManager.GetTileById(tileid).gameData.RulerStelae = newruler.dbInfo.Id;
                 // effects and other rewards:
                 // Converters for now
                 if(newruler.dbInfo.ConverterId != -1)
@@ -89,6 +90,9 @@ namespace BoardGameBackend.Managers
 
                 if(newruler.dbInfo.AuraEffectId != -1)
                      _gameContext.PlayerManager.AddEffectId(player, newruler.dbInfo.AuraEffectId);
+
+                if(_gameContext.EraEffectManager.CurrentAgeCardId == 7 && newruler.dbInfo.DeityId != -1)
+                    _gameContext.PlayerManager.IncreaseDeityLevel(player, newruler.dbInfo.DeityId);
             }
         }
 

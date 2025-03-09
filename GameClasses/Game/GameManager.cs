@@ -70,7 +70,9 @@ namespace BoardGameBackend.Managers
                 PhaseData = gameContext.PhaseManager.GetPhaseData(),
                 PlayerActionCards = gameContext.ActionCardManager.GetPlayerActioncCardsData(gameContext.PlayerManager.GetPlayerById(playerId)),
                 Konstelacje = gameContext.KonstelacjeManager.GetFullData(),
-                startGameModel = gameContext.GameOptions
+                startGameModel = gameContext.GameOptions,
+                EraEffects = gameContext.EraEffectManager.GetFullData(),
+                EventsLists = gameContext.EventsInGameManager.GetFullData()
             };
 
             return fullGameData;

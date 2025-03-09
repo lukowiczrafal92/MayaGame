@@ -12,34 +12,14 @@ namespace BoardGameBackend.Managers
         {
             _gameContext = gameContext;
         }
-        public void TriggerEndEra()
-        {
-            GameEventSendData ge = new GameEventSendData(){gameEventSendType = GameEventSendType.EraEnd};
-            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.EraWarfareScore};
-            ge.gameEventPlayerTableTwo = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.EraLuxuryScore};
-            ge.gameEventPlayerTableThird = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.EraCapitalScore};
 
+        public GameEventPlayerTable EndEraCapitalPoints(ScorePointType sctype)
+        {
+            var gept = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.EraCapitalScore};
             foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
             {
-                var prow = new PlayerTableRow(){Player = p.Id};
-                var lrow = new PlayerTableRow(){Player = p.Id};
                 var crow = new PlayerTableRow(){Player = p.Id};
-                int iScoreFromWarfare = 0;
-                int iScoreFromLuxuries = 0;
                 int iScoreFromCapital = 0;
-
-                int inumdifresource = p.PlayerLuxuries.GetNumDifferentResources();
-                if(inumdifresource >= 6)
-                    iScoreFromLuxuries += 2;
-
-                foreach(var op in _gameContext.PlayerManager.Players)
-                {
-                    if(op.WarfareScore < p.WarfareScore)
-                        iScoreFromWarfare += 2;
-
-                    if(op.PlayerLuxuries.GetNumDifferentResources() < inumdifresource)
-                        iScoreFromLuxuries += 1;
-                }
                 int iExpansion = _gameContext.BoardManager.GetCapitalCityLevel(p.Id);
                 if(iExpansion > 0)
                 {
@@ -50,20 +30,66 @@ namespace BoardGameBackend.Managers
                             iScoreFromCapital++;
                     }
                 }
+                crow.Value1 = iExpansion;
+                crow.Value2 = iScoreFromCapital;
+                gept.ListPlayerRows.Add(crow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromCapital, sctype);
+            }
+            return gept;
+        }
+
+        public GameEventPlayerTable EndEraWarfarePoints(ScorePointType sctype)
+        {
+            var gept = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.EraWarfareScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                var prow = new PlayerTableRow(){Player = p.Id};
+                int iScoreFromWarfare = 0;
+                foreach(var op in _gameContext.PlayerManager.Players)
+                {
+                    if(op.WarfareScore < p.WarfareScore)
+                        iScoreFromWarfare += 2;
+                }
 
                 prow.Value1 = p.WarfareScore;
                 prow.Value2 = iScoreFromWarfare;
+                gept.ListPlayerRows.Add(prow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromWarfare, sctype);
+            }
+            return gept;
+        }
+
+        public GameEventPlayerTable EndEraLuxuryPoints(ScorePointType sctype)
+        {
+            var gept = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.EraLuxuryScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                int iScoreFromLuxuries = 0;
+                int inumdifresource = p.PlayerLuxuries.GetNumDifferentResources();
+                if(inumdifresource >= 6)
+                    iScoreFromLuxuries += 2;
+
+                foreach(var op in _gameContext.PlayerManager.Players)
+                {
+                    if(op.PlayerLuxuries.GetNumDifferentResources() < inumdifresource)
+                        iScoreFromLuxuries += 1;
+                }
+
                 lrow.Value1 = inumdifresource;
                 lrow.Value2 = iScoreFromLuxuries;
-                crow.Value1 = iExpansion;
-                crow.Value2 = iScoreFromCapital;
-                ge.gameEventPlayerTable.ListPlayerRows.Add(prow);
-                ge.gameEventPlayerTableTwo.ListPlayerRows.Add(lrow);
-                ge.gameEventPlayerTableThird.ListPlayerRows.Add(crow);
-                _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromWarfare, ScorePointType.EraWarfare);
-                _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromLuxuries, ScorePointType.Luxuries);
-                _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromCapital, ScorePointType.DuringGameCapitalCity);
+                gept.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromLuxuries, sctype);
             }
+            return gept;
+        }
+        public void TriggerEndEra()
+        {
+            GameEventSendData ge = new GameEventSendData(){gameEventSendType = GameEventSendType.EraEnd};
+            ge.gameEventPlayerTable = EndEraWarfarePoints(ScorePointType.EraWarfare);
+            ge.gameEventPlayerTableTwo = EndEraLuxuryPoints(ScorePointType.Luxuries);
+            ge.gameEventPlayerTableThird = EndEraCapitalPoints(ScorePointType.DuringGameCapitalCity);
+            ge.IntValue1 = _gameContext.EraEffectManager.EndCurrentEraEffect();
             _gameContext.ActionManager.AddNewGameEvent(ge);
         }
         public void TriggerEndGameScores()
@@ -94,7 +120,7 @@ namespace BoardGameBackend.Managers
                     int iAngle = it * 30;
                     if(p.PlayerAngleBoard.Angles.FirstOrDefault(pa => pa.bChecked && pa.dbInfo.Angle == iAngle) != null)
                     {
-                        iScoreFromAngles += 1;
+                    //    iScoreFromAngles += 1;  teraz się zdobywa za określanie kątów jako pierwszy
                         foreach(var op in _gameContext.PlayerManager.Players)
                         {
                             if(op.PlayerAngleBoard.Angles.FirstOrDefault(pa => pa.bChecked && pa.dbInfo.Angle == iAngle) == null)
@@ -155,6 +181,8 @@ namespace BoardGameBackend.Managers
                 scoreTable.EndGameAngles = player.GetScoreFromSource(ScorePointType.EndGameAngles);
                 scoreTable.Konstelacja = player.GetScoreFromSource(ScorePointType.Konstelacja);
                 scoreTable.Luxuries = player.GetScoreFromSource(ScorePointType.Luxuries);
+                scoreTable.DuringGameAngle = player.GetScoreFromSource(ScorePointType.DuringGameAngle);
+                scoreTable.ErasAndEvents = player.GetScoreFromSource(ScorePointType.ErasAndEvents);
             }
 
             var sortedPlayerScores = playerScores

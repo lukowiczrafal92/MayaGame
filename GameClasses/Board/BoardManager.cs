@@ -120,8 +120,19 @@ namespace BoardGameBackend.Managers
         {
             var tile = GetTileById(tileid);
             tile.gameData.Level++;
+            if(tile.gameData.Level == 1)
+                CapitalStatusChanged(player, tile, 1, true);
 //            _gameContext.PlayerManager.ChangeScorePoints(player, tile.gameData.Level, ScorePointType.DuringGameCapitalCity);
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = player.Id, DataType = PlayerBasicSetDataType.CityClaim, Value1 = tile.dbData.Id});
+        }
+
+        public void CapitalStatusChanged(PlayerInGame player, Tile tile, int iAdd, bool bAdd)
+        {
+            if(_gameContext.EraEffectManager.CurrentAgeCardId == 9)
+            {
+                _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource1, iAdd);
+                _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource2, iAdd);
+            }
         }
 
         public void CityFoundOrConquest(PlayerInGame player, int tileid)

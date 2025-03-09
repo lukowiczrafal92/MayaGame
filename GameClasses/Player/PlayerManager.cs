@@ -72,6 +72,9 @@ namespace BoardGameBackend.Managers
 
         public void SetResourceAmount(PlayerInGame p, int iResourceId, int iAmount)
         {
+            if(p.PlayerResources.GetResourceById(iResourceId).Amount == iAmount)
+                return;
+                
             p.PlayerResources.GetResourceById(iResourceId).Amount = iAmount;
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.ResourceAmount, Value1 = iResourceId, Value2 = p.PlayerResources.GetResourceById(iResourceId).Amount});
         }
@@ -79,12 +82,25 @@ namespace BoardGameBackend.Managers
         public void ClaimOrderForNextTurn(PlayerInGame p)
         {
             int iNextOrder = 0;
-            foreach(var player in Players)
+            if(_gameContext.EraEffectManager.CurrentAgeCardId == 3)
             {
-                if(player.IncomingOrder > iNextOrder)
-                    iNextOrder = player.IncomingOrder;
+                iNextOrder = Players.Count;
+                foreach(var player in Players)
+                {
+                    if(player.IncomingOrder <= iNextOrder && player.IncomingOrder != -1)
+                        iNextOrder = player.IncomingOrder - 1;
+                }
             }
-            p.IncomingOrder = iNextOrder + 1;
+            else
+            {
+                foreach(var player in Players)
+                {
+                    if(player.IncomingOrder > iNextOrder)
+                        iNextOrder = player.IncomingOrder;
+                }
+                iNextOrder++;
+            }
+            p.IncomingOrder = iNextOrder;
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.IncomingOrder, Value1 = p.IncomingOrder});
         }
 
@@ -123,10 +139,19 @@ namespace BoardGameBackend.Managers
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.ScorePoints, Value1 = p.Points});
         }
 
+        public void ReduceDeityLevel(PlayerInGame p, int iDeityID)
+        {
+            var deity = p.PlayerDeities.GetDeityById(iDeityID);
+            if(deity.Level > 0)
+            {
+                deity.Level--;
+                _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.DeityLevel, Value1 = iDeityID, Value2 = p.PlayerDeities.GetDeityById(iDeityID).Level});
+            }
+        }
         public void IncreaseDeityLevel(PlayerInGame p, int iDeityID)
         {
             var deity = p.PlayerDeities.GetDeityById(iDeityID);
-            if(deity.Level == 4)
+            if(deity.Level == 3) // NOW MAX LEVEL :>
             {
                 ChangeScorePoints(p, GameConstants.DEITY_LVL_FIVE_POINTS, ScorePointType.DuringGameDeity);
             }   
@@ -135,7 +160,7 @@ namespace BoardGameBackend.Managers
                 deity.Level++;
                 if(deity.Level == 1)
                     ChangeResourceAmount(p, deity.Resource, 1);
-                else if(deity.Level == 4)
+                else if(deity.Level == 3)
                     ChangeLuxuryAmount(p, deity.Luxury, 1);
                     
                 _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.DeityLevel, Value1 = iDeityID, Value2 = p.PlayerDeities.GetDeityById(iDeityID).Level});
@@ -151,7 +176,20 @@ namespace BoardGameBackend.Managers
 
         public void CheckAngle(PlayerInGame p, int angle)
         {
+            bool bAnyPlayerHasAngle = false;
+            foreach(var player in Players)
+            {
+                if(player.PlayerAngleBoard.GetAngleById(angle).bChecked)
+                {
+                    bAnyPlayerHasAngle = true;
+                    break;
+                }
+            }
+            if(!bAnyPlayerHasAngle)
+                ChangeScorePoints(p, 1, ScorePointType.DuringGameAngle);
+            
             p.PlayerAngleBoard.GetAngleById(angle).bChecked = true;
+            
             // tutaj konstelacje
             // tutaj mark angleendscoreifever            
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.BoardAngle, Value1 = angle});
@@ -208,6 +246,11 @@ namespace BoardGameBackend.Managers
         }
         public bool HasNeedOfExtraConverting(PlayerInGame p)
         {
+            if(_gameContext.EraEffectManager.CurrentAgeCardId == 2)
+            {
+                TrimResourceOverStorage(p);
+                return false;
+            }
             bool bNeed = false;
             foreach(var resource in p.PlayerResources.Resources)
             {
@@ -247,6 +290,12 @@ namespace BoardGameBackend.Managers
         {
             player.AuraEffects.Add(effectId);
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.AuraEffect, Player = player.Id, Value1 = effectId});
+        }
+
+        public void RemoveEffectId(PlayerInGame player, int effectId)
+        {
+            player.AuraEffects.Remove(effectId);
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.RemoveAuraEffect, Player = player.Id, Value1 = effectId});
         }
         
         public bool HasPlayerRulerWithAngleId(PlayerInGame player, int angleid)

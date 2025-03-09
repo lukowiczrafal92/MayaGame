@@ -10,7 +10,9 @@ namespace BoardGameBackend.Models
         EndGameRulers,
         EndGameAngles,
         Konstelacja,
-        Luxuries
+        Luxuries,
+        DuringGameAngle,
+        ErasAndEvents
     }
     public class PointsWithPower{
         public int Points { get; set; } = 0;
@@ -33,6 +35,8 @@ namespace BoardGameBackend.Models
         public int FinalOrder {get; set;} = 0;
         public int Konstelacja {get; set;} = 0;
         public int Luxuries {get; set;} = 0;
+        public int DuringGameAngle {get; set;} = 0;
+        public int ErasAndEvents {get; set;} = 0;
     }
 
 

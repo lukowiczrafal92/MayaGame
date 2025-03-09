@@ -47,8 +47,18 @@ namespace BoardGameBackend.Managers
             }
         }
 
+        public bool IsThereNeedToSelectActionCards()
+        {
+            return _gameContext.EraEffectManager.CurrentAgeCardId != 5;
+        }
         public int GetNumCardsPerPlayer()
         {
+            if(_gameContext.EraEffectManager.CurrentAgeCardId == 5)
+                return 5;
+            
+            if(_gameContext.EraEffectManager.CurrentAgeCardId == 12)
+                return 17;
+
             return 7;
         }
 
@@ -60,14 +70,19 @@ namespace BoardGameBackend.Managers
         }
         public void DistributeCards()
         {
+            bool bOnlyForEmptyHands = _gameContext.EraEffectManager.CurrentAgeCardId == 12;
+
             int iCardsPerPlayer = GetNumCardsPerPlayer();
             foreach(var p in _gameContext.PlayerManager.Players)
             {
-                int iToAdd = iCardsPerPlayer - p.ReserveActionCards.Count;
-                for(int i = 0; i < iToAdd; i++)
-                    p.ReserveActionCards.Add(GetActionCardFromTopDeck());
+                if(!bOnlyForEmptyHands || (p.ReserveActionCards.Count == 0))
+                {
+                    int iToAdd = iCardsPerPlayer - p.ReserveActionCards.Count;
+                    for(int i = 0; i < iToAdd; i++)
+                        p.ReserveActionCards.Add(GetActionCardFromTopDeck());
 
-                SendPlayerActionCardData(p);
+                    SendPlayerActionCardData(p);
+                }
             }
         }
 
