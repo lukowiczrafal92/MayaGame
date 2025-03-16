@@ -7,7 +7,12 @@ namespace BoardGameBackend.Helpers
         private static List<string> ChangelogList = new List<string>(){
             "03.2025",
             "Karty ery: 12.",
-            "Karty wydarzeń: 28."
+            "Karty wydarzeń: 28.",
+            "16.03 POPRAWKI PO INSTRUKCJI:",
+            "Karty konstelacji dają 2/3 punkty (zamiast 3/4).",
+            "Punktacja końcowa: 2 punkty zamiast 1 punktu za każde 'zwycięstwo' na torze bóstw.",
+            "TO PONIŻEJ NIE JEST POKAZANE W INTERFEJSIE:",
+            "'4 poziom' bóstw daje 1 punkt + (1 punkt za każdego władcę z tym patronem)."
         };
         static InitJsonManager()
         {   

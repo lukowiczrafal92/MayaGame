@@ -13,8 +13,8 @@ namespace BoardGameFrontend.Models
         public const int DEITY_LVL_FIVE_POINTS = 1;
         public const int DEITY_SET_POINTS = 4;
         public const int JOKER_COST = 3;
-        public const int SCORE_KONSTELACJA_THREE = 3;
-        public const int SCORE_KONSTELACJA_FOUR = 4;
+        public const int SCORE_KONSTELACJA_THREE = 2;
+        public const int SCORE_KONSTELACJA_FOUR = 3;
 
         public static List<int> GetGameConstants()
         {

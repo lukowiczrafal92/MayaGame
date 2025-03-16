@@ -153,7 +153,7 @@ namespace BoardGameBackend.Managers
             var deity = p.PlayerDeities.GetDeityById(iDeityID);
             if(deity.Level == 3) // NOW MAX LEVEL :>
             {
-                ChangeScorePoints(p, GameConstants.DEITY_LVL_FIVE_POINTS, ScorePointType.DuringGameDeity);
+                ChangeScorePoints(p, GameConstants.DEITY_LVL_FIVE_POINTS + deity.TieBreaker, ScorePointType.DuringGameDeity);
             }   
             else
             {

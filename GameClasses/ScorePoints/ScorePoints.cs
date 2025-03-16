@@ -107,7 +107,7 @@ namespace BoardGameBackend.Managers
                     {
                         var rivaldeity = op.PlayerDeities.GetDeityById(deity.Id);
                         if(rivaldeity.Level < deity.Level || ((rivaldeity.Level == deity.Level) && (deity.TieBreaker > rivaldeity.TieBreaker)))
-                            iScoreFromDeity += 1;
+                            iScoreFromDeity += 2;
                     }
                 }
                 iScoreFromDeity += iMin * NUM_PLAYERS; //GameConstants.DEITY_SET_POINTS;
