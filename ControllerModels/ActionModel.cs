@@ -23,6 +23,8 @@ namespace BoardGameBackend.Models
         public int DeityId {get; set;} = -1;
         public int ExtraInfoTypeId {get; set;} = -1;
         public int ExtraInfoId {get; set;} = -1;
+        public int EventCardId {get; set;} = -1;
+        public bool PassOnAction {get; set;} = false;
     }
     public class ActionFormSend
     {
@@ -38,6 +40,8 @@ namespace BoardGameBackend.Models
         public int RulerCardId {get; set;} = -1;
         public int ExtraInfoTypeId {get; set;} = -1;
         public int ExtraInfoId {get; set;} = -1;
+        public int EventCardId {get; set;} = -1;
+        public bool PassOnAction {get; set;} = false;
     }
     public enum ActionTypes{
         NO_ACTION,
@@ -63,6 +67,8 @@ namespace BoardGameBackend.Models
         JOKER_ASTRONOM,
         JOKER_PRIEST,
         SKY_RULER_STAR,
-        ERA_MERCENARIES
+        ERA_MERCENARIES,
+        PILGRIMAGE_RIVAL,
+        MIRRORED_ANGLE
     }
 }

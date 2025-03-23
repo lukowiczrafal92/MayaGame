@@ -22,7 +22,8 @@ namespace BoardGameBackend.Models
         Luxury,
         AuraEffect,
         BoardRotation,
-        RemoveAuraEffect
+        RemoveAuraEffect,
+        CityLevel
     }
 
     public enum PlayerTableType

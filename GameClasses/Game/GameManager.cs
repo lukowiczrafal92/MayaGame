@@ -3,6 +3,7 @@ using BoardGameBackend.Managers.EventListeners;
 using BoardGameBackend.Mappers;
 using BoardGameBackend.Models;
 using BoardGameBackend.Providers;
+using BoardGameBackend.Repositories;
 
 namespace BoardGameBackend.Managers
 {
@@ -11,20 +12,26 @@ namespace BoardGameBackend.Managers
         private static readonly ConcurrentDictionary<string, GameContext> ActiveGames = new ConcurrentDictionary<string, GameContext>();
         private static readonly ConcurrentDictionary<string, EventListenerContainer> EventListenerContainers = new();
         private static IHubContextProvider? _hubContextProvider;
+        private static IGameBackupSaver? _gameBackupSaver;
 
-        public static void Initialize(IHubContextProvider hubContextProvider)
+        public static void Initialize(IHubContextProvider hubContextProvider, IGameBackupSaver gameBackupSaver)
         {
             _hubContextProvider = hubContextProvider;
+            _gameBackupSaver = gameBackupSaver;
         }
 
-
-        public static GameContext StartGameFromLobby(Lobby lobby, StartGameModel startGameModel)
+        public static GameContext StartGameFromBackup(Lobby lobby, StartGameModel startGameModel, FullGameBackup fullGameBackup, string gameId)
         {
-            var gameId = Guid.NewGuid().ToString();
             var players = lobby.Players.Select(p => new Player { Id = p.Id, Name = p.Name }).ToList();
 
-            var gameContext = new GameContext(gameId, players, startGameModel);
+            var gameContext = new GameContext(gameId, players, startGameModel, fullGameBackup);
+            
+            DoCommonGameContextStart(gameContext, gameId);
+            return gameContext;
+        }
 
+        public static void DoCommonGameContextStart(GameContext gameContext, string gameId)
+        {
             var eventListenerContainer = new EventListenerContainer(_hubContextProvider);
             eventListenerContainer.SubscribeAll(gameContext);
             
@@ -35,7 +42,21 @@ namespace BoardGameBackend.Managers
             {             
                 EndGame(endOfGame.GameId);                     
             }, priority: 0);
+
+            gameContext.EventManager.Subscribe<RequestBackupData>("GameRequestBackup", pData =>
+            {             
+                BackupRequested(pData.GameId);                     
+            }, priority: 0);
+        }
+
+        public static GameContext StartGameFromLobby(Lobby lobby, StartGameModel startGameModel)
+        {
+            var gameId = Guid.NewGuid().ToString();
+            var players = lobby.Players.Select(p => new Player { Id = p.Id, Name = p.Name }).ToList();
+
+            var gameContext = new GameContext(gameId, players, startGameModel);
             
+            DoCommonGameContextStart(gameContext, gameId);
             return gameContext;
         }
 
@@ -47,6 +68,33 @@ namespace BoardGameBackend.Managers
             }
 
             return null;
+        }
+
+        public static FullGameBackup GetGameBackupFullData(string gameId)
+        {
+            var gameContext = GetGameById(gameId);
+            if(gameContext == null) return null;
+
+            
+            List<FullPlayerData> playerData =  new List<FullPlayerData>{}; 
+            List<PlayerBasicSetData> nSetData = new List<PlayerBasicSetData>();
+            FillPlayerData(playerData, gameContext, nSetData);
+
+            FullGameBackup FullGameBackup = new FullGameBackup()
+            {
+                PlayersData = playerData,
+                TilesData = gameContext.BoardManager.GetFullTilesData(),
+                PlayerSetData = nSetData,
+                FullRulerData = gameContext.RulerCardsManager.GetFullRulerBackup(),
+                PhaseData = gameContext.PhaseManager.GetPhaseData(),
+                Konstelacje = gameContext.KonstelacjeManager.GetFullData(),
+                EraEffects = gameContext.EraEffectManager.GetFullData(),
+                EventsLists = gameContext.EventsInGameManager.GetFullData(),
+                PhaseQueue = gameContext.PhaseManager.PhaseQueue,
+                ActionDeck = gameContext.ActionCardManager.GetActionCards(),
+                PlayerActionCards = gameContext.PlayerManager.GetBackupActionCards()
+            };
+            return FullGameBackup;
         }
 
         public static FullGameData? GetGameData(string gameId, Guid playerId)
@@ -139,6 +187,15 @@ namespace BoardGameBackend.Managers
         {
             Console.WriteLine("Próbujemy usunąć grę: " + gameId);
             ActiveGames.TryRemove(gameId, out _);
+            _gameBackupSaver.DeleteGameId(gameId);
+        }
+
+        public static void BackupRequested(string gameId)
+        {            
+            FullGameBackup fgb = GetGameBackupFullData(gameId);
+            if(fgb == null) return;
+            
+            _gameBackupSaver.UpdateBackup(gameId, fgb);
         }
 
     }

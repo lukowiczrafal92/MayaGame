@@ -103,14 +103,19 @@ namespace BoardGameBackend.Managers
                 foreach(var deity in p.PlayerDeities.Deities)
                 {
                     iMin = Math.Min(iMin, deity.Level);
-                    foreach(var op in _gameContext.PlayerManager.Players)
+                    if(deity.Level > 0)  // 18.03.2025 new rule!
                     {
-                        var rivaldeity = op.PlayerDeities.GetDeityById(deity.Id);
-                        if(rivaldeity.Level < deity.Level || ((rivaldeity.Level == deity.Level) && (deity.TieBreaker > rivaldeity.TieBreaker)))
-                            iScoreFromDeity += 2;
+                        foreach(var op in _gameContext.PlayerManager.Players)
+                        {
+                            var rivaldeity = op.PlayerDeities.GetDeityById(deity.Id);
+                            if(rivaldeity.Level < deity.Level || ((rivaldeity.Level == deity.Level) && (deity.TieBreaker > rivaldeity.TieBreaker)))
+                                iScoreFromDeity += 2;
+                        }
                     }
                 }
-                iScoreFromDeity += iMin * NUM_PLAYERS; //GameConstants.DEITY_SET_POINTS;
+
+                iScoreFromDeity += iMin * (GameConstants.DEITY_SET_PER_PLAYERS * NUM_PLAYERS + GameConstants.DEITY_SET_POINTS);
+                
                 if(iScoreFromDeity > 0)
                     _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromDeity, ScorePointType.EndGameDeity);
                 // angles

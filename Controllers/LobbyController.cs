@@ -5,6 +5,7 @@ using BoardGameBackend.Managers;
 using BoardGameBackend.Hubs;
 using BoardGameBackend.MiddleWare;
 using AutoMapper;
+using BoardGameBackend.Repositories;
 
 namespace BoardGameBackend.Controllers
 {
@@ -14,11 +15,12 @@ namespace BoardGameBackend.Controllers
     {
         private readonly IHubContext<LobbyHub> _hubContext;
         private readonly IMapper _mapper;
-
-        public LobbyController(IHubContext<LobbyHub> hubContext, IMapper mapper)
+        private readonly IGameBackupSaver _gameBackupSaver;
+        public LobbyController(IHubContext<LobbyHub> hubContext, IMapper mapper, IGameBackupSaver gameBackupSaver)
         {
             _mapper = mapper;
             _hubContext = hubContext;
+            _gameBackupSaver = gameBackupSaver;
         }
 
         // POST: api/lobby/create
@@ -94,7 +96,9 @@ namespace BoardGameBackend.Controllers
                 var lobbyInfo = LobbyManager.LeaveLobby(id, user.Id);
                 if (lobbyInfo == null)
                 {
+                    
                     await _hubContext.Clients.Group(id).SendAsync("LobbyDestroyed");
+                    _gameBackupSaver.DeleteLobbyId(id);
                     return Ok("Lobby destroyed or player left.");
                 }
                 else

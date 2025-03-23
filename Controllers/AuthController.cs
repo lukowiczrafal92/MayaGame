@@ -13,7 +13,6 @@ namespace BoardGameBackend.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IMapper _mapper;
-        private const int m_iGameVersion = 1;
 
         public AuthController(IAuthService authService, IMapper mapper)
         {
@@ -23,7 +22,7 @@ namespace BoardGameBackend.Controllers
 
         public bool CheckGameVersion(int iVersion)
         {
-            return m_iGameVersion == iVersion;
+            return GameConstants.m_iGameVersion == iVersion;
         }
 
         [HttpPost("signup")]

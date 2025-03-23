@@ -60,6 +60,10 @@ namespace BoardGameBackend.Models
         public int TileId { get; set; }
     }
 
+    public class RequestBackupData
+    {
+       public required string GameId {get; set;}
+    }
     public class EndOfGame
     {
         public required Dictionary<Guid, ScorePointsTable> PlayerScores { get; set; }

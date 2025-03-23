@@ -16,6 +16,17 @@ namespace BoardGameBackend.Managers
             for(int i = 0; i < l.Count; i++)
                 Tiles.Add(new Tile(l[i], iNumPlayers));
         }
+        public BoardManager(GameContext gameContext, int iNumPlayers, List<TileGame> ftd)
+        {
+            _gameContext = gameContext;
+            Tiles = new List<Tile>();
+            List<TileGameData> l = GameDataManager.GetTiles();
+            for(int i = 0; i < l.Count; i++)
+            {
+                Tiles.Add(new Tile(l[i], iNumPlayers));
+                Tiles[i].gameData = ftd[i];
+            }
+        }
 
         public Tile? GetTileById(int id)
         {
@@ -122,8 +133,18 @@ namespace BoardGameBackend.Managers
             tile.gameData.Level++;
             if(tile.gameData.Level == 1)
                 CapitalStatusChanged(player, tile, 1, true);
-//            _gameContext.PlayerManager.ChangeScorePoints(player, tile.gameData.Level, ScorePointType.DuringGameCapitalCity);
+
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = player.Id, DataType = PlayerBasicSetDataType.CityClaim, Value1 = tile.dbData.Id});
+        }
+
+        public void CityLoosesExpansion(PlayerInGame player, int tileid)
+        {
+            var tile = GetTileById(tileid);
+            tile.gameData.Level--;
+            if(tile.gameData.Level == 0)
+                CapitalStatusChanged(player, tile, -1, false);
+
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = player.Id, DataType = PlayerBasicSetDataType.CityLevel, Value1 = tile.dbData.Id, Value2 = tile.gameData.Level});
         }
 
         public void CapitalStatusChanged(PlayerInGame player, Tile tile, int iAdd, bool bAdd)
@@ -168,6 +189,39 @@ namespace BoardGameBackend.Managers
                     cc++;
             }
             return cc;
+        }
+
+        public int GetCityStackAmount(Guid playerId)
+        {
+            int iBigestStack = 0;
+            Dictionary<int, bool> dChecked = new Dictionary<int, bool>();
+            foreach(var tile in Tiles)
+            {
+                if(!dChecked.ContainsKey(tile.dbData.Id) && tile.gameData.OwnerId == playerId)
+                {
+                    int iCurrentStack = 1;
+                    dChecked.Add(tile.dbData.Id, true);
+                    List<Tile> tileIt = new List<Tile>(){tile};
+                    for(int i = 0; i < 10; i++)
+                    {
+                        if(tileIt.Count >= i + 1)
+                        {
+                            foreach(var sTile in GetTilesInRange(tileIt[i], 1, true))
+                            {
+                                if(sTile.gameData.OwnerId == playerId && !dChecked.ContainsKey(sTile.dbData.Id))
+                                {
+                                    iCurrentStack++;
+                                    dChecked.Add(sTile.dbData.Id, true);
+                                    tileIt.Add(sTile);
+                                }
+                            }
+                        }
+                    }
+                    if(iCurrentStack > iBigestStack)
+                        iBigestStack = iCurrentStack;
+                }
+            }
+            return iBigestStack;
         }
     }
 }

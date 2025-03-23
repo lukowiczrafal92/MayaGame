@@ -28,7 +28,17 @@ namespace BoardGameBackend.Managers
             PhaseQueue.Add(new Phase(){PhaseType = PhaseType.PreEndGameChecks, ActivePlayers = new List<Guid>()});
             PhaseQueue.Add(new Phase(){PhaseType = PhaseType.EndGame, ActivePlayers = new List<Guid>()});
         }
-
+        public PhaseManager(GameContext gameContext, PhaseData pData, List<Phase> qBackup)
+        {
+            _gameContext = gameContext;
+            OnStartEffects = new PhaseStartedEffectManager(gameContext);
+            PhaseQueue = qBackup;
+            CurrentEra = pData.CurrentEra;
+            CurrentAction = pData.CurrentAction;
+            CurrentRound = pData.CurrentRound;
+            foreach(var playerid in GetCurrentPhase().ActivePlayers)
+                _gameContext.PlayerManager.GetPlayerById(playerid).Active = true;
+        }
         public PhaseData GetPhaseData()
         {
             return new PhaseData(){

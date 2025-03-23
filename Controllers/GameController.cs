@@ -5,6 +5,7 @@ using BoardGameBackend.MiddleWare;
 using Microsoft.AspNetCore.SignalR;
 using AutoMapper;
 using BoardGameBackend.Hubs;
+using BoardGameBackend.Repositories;
 
 namespace BoardGameBackend.Controllers
 {
@@ -13,11 +14,13 @@ namespace BoardGameBackend.Controllers
     public class GameController : ControllerBase
     {
         private readonly IHubContext<LobbyHub> _hubContext;
+        private readonly IGameBackupSaver _gameBackupService;
         private readonly IMapper _mapper;
 
-        public GameController(IHubContext<LobbyHub> hubContext, IMapper mapper)
+        public GameController(IHubContext<LobbyHub> hubContext, IGameBackupSaver backupService, IMapper mapper)
         {
             _hubContext = hubContext;
+            _gameBackupService = backupService;
             _mapper = mapper;
         }
 
@@ -38,6 +41,9 @@ namespace BoardGameBackend.Controllers
             }
             
             gameContext.StartGame();
+            FullMayabBackup fmb = LobbyManager.GetFullBackupData(id, user);
+            if(fmb != null)
+                _gameBackupService.InsertBackup(fmb);
             
             return Ok(new { gameContext.GameId, Message = "Game started successfully.", gameContext.PlayerManager.Players });
         }

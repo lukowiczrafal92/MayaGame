@@ -12,6 +12,16 @@ namespace BoardGameBackend.Managers
         {
             _gameContext = gameContext;
         }
+        public ActionCardManager(GameContext gameContext, List<ActionCard> cards)
+        {
+            _gameContext = gameContext;
+            actionCards = cards;
+        }
+
+        public List<ActionCard> GetActionCards()
+        {
+            return actionCards;
+        }
         public void CreateActionCardDeck()
         {
             actionCards.Clear();
@@ -80,6 +90,12 @@ namespace BoardGameBackend.Managers
                     int iToAdd = iCardsPerPlayer - p.ReserveActionCards.Count;
                     for(int i = 0; i < iToAdd; i++)
                         p.ReserveActionCards.Add(GetActionCardFromTopDeck());
+
+                    if(p.ReserveActionCards.Count == 5)
+                    {
+                        p.HandActionCards.AddRange(p.ReserveActionCards);
+                        p.ReserveActionCards.Clear();
+                    }
 
                     SendPlayerActionCardData(p);
                 }

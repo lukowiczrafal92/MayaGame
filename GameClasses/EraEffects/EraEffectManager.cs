@@ -34,6 +34,19 @@ namespace BoardGameBackend.Managers
             AgeTwoCard = deck[1];
             AgeThreeCard = deck[2];
         }
+        public EraEffectManager(GameContext gameContext, List<int> fullData)
+        {
+            _gameContext = gameContext;
+            EraEffectTriggersManager = new EraEffectTriggersManager(gameContext);
+
+            if(!gameContext.GameOptions.AgeCards)
+                return;
+
+            CurrentAgeCardId = fullData[0];
+            AgeOneCard = fullData[1];
+            AgeTwoCard = fullData[2];
+            AgeThreeCard = fullData[3];
+        }
 
         public int GetCurrentAgeEffectId()
         {

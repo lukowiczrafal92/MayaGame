@@ -32,6 +32,17 @@ namespace BoardGameBackend.Managers
             }
         }
 
+        public KonstelacjeManager(GameContext gameContext, List<KonstelacjaSendInfo> Konstelacje)
+        {
+            _gameContext = gameContext;
+            lKonstelacje = new List<Konstelacja>();
+            foreach(var h in Konstelacje)
+            {
+                var k = new Konstelacja(){dbInfo = GameDataManager.GetKonstelacjaById(h.Id), sendInfo = h};
+                lKonstelacje.Add(k);
+            }
+        }
+
         public List<KonstelacjaSendInfo> GetFullData()
         {
             List<KonstelacjaSendInfo> a = new List<KonstelacjaSendInfo>();

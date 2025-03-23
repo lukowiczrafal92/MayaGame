@@ -41,6 +41,7 @@ namespace BoardGameBackend.Repositories
             }
         }
 
+
         public async Task<AuthenticateData?> LoginAsync(LoginUserDto userLogin)
         {
             var filter =  filterBuilder.Eq(existingUser => existingUser.Username, userLogin.Username);
@@ -63,7 +64,7 @@ namespace BoardGameBackend.Repositories
         {
             var filter =  filterBuilder.Eq(existingUser => existingUser.Id, id);
             var user = await usersCollection.Find(filter).SingleOrDefaultAsync();
-
+            
             return user;
         }
 

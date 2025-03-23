@@ -12,6 +12,7 @@ namespace BoardGameBackend.Hubs
         public static readonly ConcurrentDictionary<string, PlayerInLobby> ConnectionMappings = new ConcurrentDictionary<string, PlayerInLobby>();
         private static readonly ConcurrentDictionary<string, LobbyInfo> Lobbies = new ConcurrentDictionary<string, LobbyInfo>();
         private IAuthService _userService { get; set; }
+        private IGameBackupSaver _backupService { get; set; }
         private readonly IMapper _mapper;
 
         public override async Task OnConnectedAsync()
@@ -19,10 +20,32 @@ namespace BoardGameBackend.Hubs
             await base.OnConnectedAsync();
         }
 
-        public LobbyHub(IAuthService userService, IMapper mapper)
+        public async void AddBackupLobbies()
+        {   
+            var hList = await _backupService.GetAllBackupData();
+            if(hList == null)
+                return;
+
+            foreach(var fmb in hList)
+            {
+                LobbyInfo li = new LobbyInfo(){
+                    HostId = fmb.lobbyinfo.Lobby.HostId,
+                    GameHasStarted = true
+                };
+
+                foreach(var p in fmb.lobbyinfo.Lobby.Players)
+                    li.Players.Add(p.Id);
+
+                Lobbies[fmb.lobbyinfo.Lobby.Id] = li;
+            }
+        }
+
+        public LobbyHub(IAuthService userService, IGameBackupSaver backupService, IMapper mapper)
         {
             _userService = userService;
             _mapper = mapper;
+            _backupService = backupService;
+            AddBackupLobbies();
         }
 
         public async Task MarkPlayerDisconnected(string lobbyId, PlayerInLobby player)
@@ -62,7 +85,7 @@ namespace BoardGameBackend.Hubs
                         {
                             // If the player is the host and the game hasn't started, destroy the lobby
                             LobbyManager.DestroyLobby(lobbyId);
-                            await DestroyLobby(lobbyId, player);
+                            await LobbyDestroyed(lobbyId, player);
                         }
                         else
                         {
@@ -97,7 +120,7 @@ namespace BoardGameBackend.Hubs
                         if (disconnectedPlayer.Id == lobbyInfo.HostId)
                         {
                             LobbyManager.DestroyLobby(lobbyId);
-                            await DestroyLobby(lobbyId, disconnectedPlayer);
+                            await LobbyDestroyed(lobbyId, disconnectedPlayer);
                         }
                         else
                         {
@@ -120,10 +143,12 @@ namespace BoardGameBackend.Hubs
             var user = await _userService.GetUserById(Guid.Parse(userIdClaim!.Value));
             PlayerInLobby player = _mapper.Map<PlayerInLobby>(user);
 
+            Console.WriteLine("Join lobby " + lobbyId);
             if (Lobbies.TryGetValue(lobbyId, out var lobbyInfo))
             {
                 if (lobbyInfo.Players.Contains(player.Id))
                 {
+                Console.WriteLine("Seems okay " + lobbyId);
                     player.IsConnected = true;
                     var lobby = LobbyManager.GetLobbyById(lobbyId);
                     if (lobby?.Lobby.GameId != null)
@@ -136,11 +161,13 @@ namespace BoardGameBackend.Hubs
                 }
                 else
                 {
+                Console.WriteLine("Does not contain player " + lobbyId);
                     lobbyInfo.Players.Add(player.Id);
                 }
             }
             else
             {
+                Console.WriteLine("Created new lobby " + lobbyId);
                 lobbyInfo = new LobbyInfo
                 {
                     Players = new List<Guid> { player.Id },
@@ -157,6 +184,7 @@ namespace BoardGameBackend.Hubs
 
         public async Task Reconnect(string lobbyId)
         {
+                Console.WriteLine("Reconnect firing");
             var userIdClaim = Context.User?.FindFirst("id");
             var user = await _userService.GetUserById(Guid.Parse(userIdClaim!.Value));
             var player = _mapper.Map<PlayerInLobby>(user);
@@ -205,12 +233,14 @@ namespace BoardGameBackend.Hubs
             return null;
         }
 
-        public async Task DestroyLobby(string lobbyId, PlayerInLobby player)
+        public async Task LobbyDestroyed(string lobbyId, PlayerInLobby player)
         {
             if (Lobbies.TryRemove(lobbyId, out var lobbyInfo))
             {
                 await Clients.Group(lobbyId).SendAsync("DestroyLobby", player);
             }
+            Console.WriteLine("Tutaj odpala się.");
+            _backupService.DeleteLobbyId(lobbyId);
         }
 
     }

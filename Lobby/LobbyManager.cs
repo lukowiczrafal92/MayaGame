@@ -1,4 +1,5 @@
 using BoardGameBackend.Models;
+using BoardGameFrontend.Models;
 
 namespace BoardGameBackend.Managers;
 
@@ -149,4 +150,43 @@ public static class LobbyManager
         return Lobbies; // Assuming Lobbies is a dictionary or similar collection
     }
 
+    public static FullMayabBackup? GetFullBackupData(string lobbyId, UserModel user)
+    {
+        var lobbyInfo = Lobbies.FirstOrDefault(l => l.Lobby.Id == lobbyId);
+        if (lobbyInfo != null && lobbyInfo.Lobby.HostId == user.Id)
+        {
+            var gameContext = GameManager.GetGameById(lobbyInfo.Lobby.GameId);
+            FullMayabBackup fmb = new FullMayabBackup()
+            {
+                GameId = gameContext.GameId,
+                lobbyinfo = lobbyInfo,
+                GameVersion = GameConstants.m_iGameVersion,
+                FullGameBackup = GameManager.GetGameBackupFullData(gameContext.GameId)
+            };
+            return fmb;
+        }
+        return null;
+    }
+
+    public static void RecreateLobbyGameFromBackupData(FullMayabBackup fmb)
+    {
+        if(fmb.FullGameBackup == null)
+            return;
+
+        foreach(var hh in fmb.lobbyinfo.Lobby.Players)
+        {
+            hh.IsConnected = false;
+        }
+        Lobbies.Add(fmb.lobbyinfo);
+        var gameContext = GameManager.StartGameFromBackup(fmb.lobbyinfo.Lobby, fmb.lobbyinfo.StartGameModel, fmb.FullGameBackup, fmb.GameId);
+        SetGameIdForLobby(fmb.lobbyinfo.Lobby.Id, gameContext.GameId);
+    }
+    public static void RecreateLobbyGameFromBackups(List<FullMayabBackup> hList)
+    {
+        if(hList == null)
+            return;
+
+        foreach(var fmb in hList)
+            RecreateLobbyGameFromBackupData(fmb);
+    }
 }

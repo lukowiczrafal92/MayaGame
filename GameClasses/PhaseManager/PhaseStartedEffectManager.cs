@@ -20,6 +20,7 @@ namespace BoardGameBackend.Managers
                 { PhaseType.EndGame, OnEndGame },
                 { PhaseType.PreEndGameChecks, OnPreEndGameChecks },
                 { PhaseType.InGameEvent, OnEventInGame },
+                { PhaseType.SpecialPlayerAction, OnSpecialPlayerActionCheck }
             };
         }
         
@@ -27,6 +28,13 @@ namespace BoardGameBackend.Managers
         {
             if (triggerActions.ContainsKey(phasetype))
                 triggerActions[phasetype](phase);
+        }
+
+        public void OnSpecialPlayerActionCheck(Phase? phase)
+        {
+            var p = _gameContext.PlayerManager.GetPlayersInOrder()[phase.Value2];
+            if(_gameContext.ActionManager.ActionChecksManager.DoPlayerNeedAction(p, phase.Value1))
+                _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.PlayerAction, ActivePlayers = new List<Guid>(){p.Id}, Value1 = phase.Value1});
         }
         public void OnEraStart(Phase? phase)
         {

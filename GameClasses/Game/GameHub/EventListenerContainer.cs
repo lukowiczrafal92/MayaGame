@@ -1,4 +1,5 @@
 using BoardGameBackend.Providers;
+using BoardGameBackend.Repositories;
 
 namespace BoardGameBackend.Managers.EventListeners
 {

@@ -27,6 +27,31 @@ namespace BoardGameBackend.Managers
             }
         }
 
+        public PlayersManager(List<Player> players, List<FullPlayerData> fullPlayerData, List<PlayerBackupActionCards> actionCards, GameContext gameContext)
+        {
+            _gameContext = gameContext;
+            var random = new Random();
+            Players = players
+                .OrderBy(p => random.Next())
+                .Select(p => new PlayerInGame(p))
+                .ToList();
+
+            foreach(var data in fullPlayerData)
+            {
+                var p = GetPlayerById(data.Player.Id);
+                p.VisionAngle = data.Player.VisionAngle;
+                p.CurrentOrder = data.Player.CurrentOrder;
+                p.IncomingOrder = data.Player.IncomingOrder;
+            }
+            
+            foreach(var data in actionCards)
+            {
+                var p = GetPlayerById(data.PlayerId);
+                p.HandActionCards = data.HandActionCards;
+                p.ReserveActionCards = data.ReserveActionCards;
+            }
+        }
+
         public PlayerInGame? GetPlayerById(Guid playerId)
         {
             return Players.FirstOrDefault(p => p.Id == playerId);
@@ -57,6 +82,15 @@ namespace BoardGameBackend.Managers
             return  Players
                     .OrderBy(p => p.CurrentOrder)
                     .ToList();
+        }
+
+        public List<PlayerBackupActionCards> GetBackupActionCards()
+        {
+            List<PlayerBackupActionCards> lpa = new List<PlayerBackupActionCards>();
+            foreach(var p in Players)
+                lpa.Add(new PlayerBackupActionCards(){PlayerId = p.Id, HandActionCards = p.HandActionCards, ReserveActionCards = p.ReserveActionCards});
+
+            return lpa;
         }
 
         public void ChangeResourceIncome(PlayerInGame p, int iResourceId, int iAmount)
@@ -122,7 +156,7 @@ namespace BoardGameBackend.Managers
             return _player.AuraEffects.Contains(effectId);
         }
 
-        public void ChangeWarfareScore(PlayerInGame p, int amount)
+        public void ChangeWarfareScore(PlayerInGame p, int amount) // can be negative
         {
             if(amount == 0) return;
 
@@ -153,7 +187,7 @@ namespace BoardGameBackend.Managers
             var deity = p.PlayerDeities.GetDeityById(iDeityID);
             if(deity.Level == 3) // NOW MAX LEVEL :>
             {
-                ChangeScorePoints(p, GameConstants.DEITY_LVL_FIVE_POINTS + deity.TieBreaker, ScorePointType.DuringGameDeity);
+                ChangeScorePoints(p, GameConstants.DEITY_LVL_FIVE_POINTS + deity.TieBreaker * GameConstants.DEITY_LVL_FOUR_PER_PATRON, ScorePointType.DuringGameDeity);
             }   
             else
             {
@@ -186,7 +220,11 @@ namespace BoardGameBackend.Managers
                 }
             }
             if(!bAnyPlayerHasAngle)
+            {
                 ChangeScorePoints(p, 1, ScorePointType.DuringGameAngle);
+                if(_gameContext.EraEffectManager.CurrentAgeCardId == 16)
+                    _gameContext.PlayerManager.ChangeWarfareScore(p, 1);
+            }
             
             p.PlayerAngleBoard.GetAngleById(angle).bChecked = true;
             
@@ -205,12 +243,24 @@ namespace BoardGameBackend.Managers
                 _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.UsedActionCard, Value1 = gameindexcard});
             }
         }
+
+        public int GetRealIncome(PlayerInGame p, int income, int resid)
+        {
+            if(_gameContext.EraEffectManager.CurrentAgeCardId == 19)
+            {
+                int deitylevel = p.PlayerDeities.GetDeityByResource(resid).Level;
+                if(deitylevel > income)
+                    return deitylevel;
+            }
+            return income;
+        }
         public void TriggerIncome(PlayerInGame p)
         {
             foreach(var resource in p.PlayerResources.Resources)
             {
-                if(resource.Income != 0)
-                    ChangeResourceAmount(p, resource.Id, resource.Income);
+                int iRealIncome = GetRealIncome(p, resource.Income, resource.Id);
+                if(iRealIncome != 0)
+                    ChangeResourceAmount(p, resource.Id, iRealIncome);
             }
         }
 
@@ -224,7 +274,6 @@ namespace BoardGameBackend.Managers
         public bool HasNeedOfEndGameConverting(PlayerInGame p)
         {
             bool bAnyConverterUsable = false;
-            bool bAnyConverterIntoScorable = false;
             bool bAnyScoreResource = false; 
             foreach(var resource in p.PlayerResources.Resources)
             {
@@ -235,14 +284,10 @@ namespace BoardGameBackend.Managers
                 {
                     var dbinfo = GameDataManager.GetResourceConverterById(converter);
                     if(dbinfo.FromValue <= resource.Amount)
-                    {
                         bAnyConverterUsable = true;
-                        if(p.PlayerResources.GetResourceById(dbinfo.ToResource).EndGameScore > 0)
-                            bAnyConverterIntoScorable = true;
-                    }
                 }
             }
-            return bAnyConverterUsable && bAnyScoreResource && bAnyConverterIntoScorable;
+            return bAnyConverterUsable && bAnyScoreResource;
         }
         public bool HasNeedOfExtraConverting(PlayerInGame p)
         {

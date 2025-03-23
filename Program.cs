@@ -50,7 +50,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddSingleton<IAuthService, MongoAuthService>();
+builder.Services.AddSingleton<IGameBackupSaver, MongoBackupService>();
 builder.Services.AddSingleton<IHubContextProvider, HubContextProvider>();
+builder.Services.AddHostedService<MyHostedService>();
 
 builder.Services.AddAuthentication(options =>
     {
@@ -87,8 +89,12 @@ builder.Services.AddAuthentication(options =>
     });
 var app = builder.Build();
 
+
 var hubContextProvider = app.Services.GetRequiredService<IHubContextProvider>();
-GameManager.Initialize(hubContextProvider);
+var singletonReadBackups = app.Services.GetRequiredService<IGameBackupSaver>();
+GameManager.Initialize(hubContextProvider, singletonReadBackups);
+
+//LobbyManager.RecreateLobbyGameFromBackups(await singletonReadBackups.GetAllBackupData());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -104,5 +110,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<LobbyHub>("/lobbyhub").RequireAuthorization();
-
 app.Run();

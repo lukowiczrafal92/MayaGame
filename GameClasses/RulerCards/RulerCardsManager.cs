@@ -21,6 +21,21 @@ namespace BoardGameBackend.Managers
             Random rng = new Random();
             _deck = _deck.OrderBy(m => rng.Next()).ToList();
         }
+        public RulerCardsManager(GameContext gameContext, FullRulerBackup frb)
+        {
+            _gameContext = gameContext;
+            foreach(var id in frb.RulerDeck)
+                _deck.Add(new RulerCard(){dbInfo = GameDataManager.GetRulerById(id)});
+                
+            foreach(var id in frb.RulerPool)
+                _availablepool.Add(new RulerCard(){dbInfo = GameDataManager.GetRulerById(id)});
+        }
+        public bool AnyOptionLeft()
+        {
+            return (_deck.Count > 0) || (_availablepool.Count > 0);
+        }
+
+        
         public void OnAgeStart()
         {
             _gameContext.ActionManager.RulerDataDirty = true;
@@ -62,6 +77,17 @@ namespace BoardGameBackend.Managers
             return null;
         }
 
+        public void PlayerBackupRulerCard(PlayerInGame player, int rulerid)
+        {
+            RulerCard newruler = new RulerCard(){dbInfo = GameDataManager.GetRulerById(rulerid)};
+            player.Rulers.Add(newruler);
+
+            if(newruler.dbInfo.DeityId != -1)
+                player.PlayerDeities.GetDeityById(newruler.dbInfo.DeityId).TieBreaker++;
+            
+            if(newruler.dbInfo.EndGameResource != -1)
+                player.PlayerResources.GetResourceById(newruler.dbInfo.EndGameResource).EndGameScore += newruler.dbInfo.AbilityInfo;
+        }
         public void PlayerAcquiredRulerCard(PlayerInGame player, int rulerid, int tileid)
         {
             RulerCard newruler = GetRulerCardFromPoolById(rulerid);
@@ -107,6 +133,19 @@ namespace BoardGameBackend.Managers
             foreach(var h in _availablepool)
                 frd.RulerPool.Add(h.dbInfo.Id);
 
+        }
+        public FullRulerBackup GetFullRulerBackup()
+        {
+            List<int> rulerdeck = new List<int>();
+            foreach(var h in _deck)
+                rulerdeck.Add(h.dbInfo.Id);
+
+            FullRulerBackup frb = new FullRulerBackup()
+            {
+                RulerDeck = rulerdeck,
+                RulerPool = GetRulerPool()
+            };
+            return frb;
         }
         public List<int> GetRulerPool()
         {

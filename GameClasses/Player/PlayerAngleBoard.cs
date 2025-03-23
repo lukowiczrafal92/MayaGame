@@ -20,6 +20,13 @@ namespace BoardGameBackend.Models
             return Angles.FirstOrDefault(a => a.dbInfo.Id == id);
         }
 
+        public PlayerAngleBoardTile GetMirroredAngleById(int id)
+        {
+            PlayerAngleBoardTile p = GetAngleById(id);
+            int mAngle = (p.dbInfo.Angle + 180) % 360;
+            return Angles.FirstOrDefault(a => a.dbInfo.Distance == p.dbInfo.Distance && a.dbInfo.Angle == mAngle);
+        }
+
         public PlayerAngleBoardTile GetAngleByXY(int x, int y)
         {
             return Angles.FirstOrDefault(a => a.dbInfo.X == x && a.dbInfo.Y == y);

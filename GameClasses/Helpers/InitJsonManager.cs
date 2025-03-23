@@ -5,14 +5,13 @@ namespace BoardGameBackend.Helpers
         private static Dictionary<string, string> jsonDictionary = new Dictionary<string, string>();
         
         private static List<string> ChangelogList = new List<string>(){
-            "03.2025",
-            "Karty ery: 12.",
-            "Karty wydarzeń: 28.",
-            "16.03 POPRAWKI PO INSTRUKCJI:",
-            "Karty konstelacji dają 2/3 punkty (zamiast 3/4).",
-            "Punktacja końcowa: 2 punkty zamiast 1 punktu za każde 'zwycięstwo' na torze bóstw.",
-            "TO PONIŻEJ NIE JEST POKAZANE W INTERFEJSIE:",
-            "'4 poziom' bóstw daje 1 punkt + (1 punkt za każdego władcę z tym patronem)."
+            "System backupów. Po restarcie serwera nie utracimy danych o rozgrywce.",
+            "Podbity gracz otrzymuje po 1 specjaliście z miasta jako rekompensatę.",
+            "Pielgrzymka (akcja) została podzielona na dwie akcje: Obrzędy (miasto gracza) i Pielgrzymkę (miasto rywala).",
+            "Zestawy bóstw nie punktują na koniec gry.",
+            "Gracz nie punktuje za poziomy bóstw jeżeli jest na poziomie 0 (nawet jeśli jest od kogoś 'lepszy' z patronów władców).",
+            "Karty ery: 20 (+8).",
+            "Karty wydarzeń: 44 (+16)."
         };
         static InitJsonManager()
         {   

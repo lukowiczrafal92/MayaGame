@@ -3,13 +3,13 @@ using BoardGameBackend.Models;
 using Microsoft.AspNetCore.SignalR;
 using BoardGameBackend.Hubs;
 using BoardGameBackend.Mappers;
+using BoardGameBackend.Repositories;
 
 namespace BoardGameBackend.Managers.EventListeners
 {
     public class OtherEventListener : IEventListener
     {
         private readonly IHubContextProvider _hubContextProvider;
-
         public OtherEventListener(IHubContextProvider hubContextProvider)
         {
             _hubContextProvider = hubContextProvider;

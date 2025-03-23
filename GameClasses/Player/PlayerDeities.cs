@@ -24,7 +24,11 @@ namespace BoardGameBackend.Managers
         }
         public PlayerDeity GetDeityById(int id)
         {
-          return Deities.Find(d => d.Id == id);
+          return Deities.FirstOrDefault(d => d.Id == id);
+        }
+        public PlayerDeity GetDeityByResource(int resid)
+        {
+          return Deities.FirstOrDefault(d => d.Resource == resid);
         }
     }
 }

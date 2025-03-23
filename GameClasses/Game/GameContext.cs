@@ -38,6 +38,63 @@ namespace BoardGameBackend.Managers
             EraEffectManager = new EraEffectManager(this);
             EventsInGameManager = new EventsInGameManager(this);
         }
+        public GameContext(string gameId, List<Player> players, StartGameModel startGameModel, FullGameBackup fullGameBackup)
+        {
+            EventManager = new EventManager();
+            GameId = gameId;
+            GameOptions = startGameModel;
+            ActionManager = new ActionManager(this);
+            PlayerManager = new PlayersManager(players, fullGameBackup.PlayersData, fullGameBackup.PlayerActionCards, this);
+            BoardManager = new BoardManager(this, players.Count(), fullGameBackup.TilesData);
+            ScorePointsManager = new ScorePointsManager(this);
+            RulerCardsManager = new RulerCardsManager(this, fullGameBackup.FullRulerData);
+            PhaseManager = new PhaseManager(this, fullGameBackup.PhaseData, fullGameBackup.PhaseQueue);
+            ActionCardManager = new ActionCardManager(this, fullGameBackup.ActionDeck);
+            TimerManager = new TimerManager(this); // wiadomo tego nie ruszamy :) czasy się zresetują i tyle
+            KonstelacjeManager = new KonstelacjeManager(this, fullGameBackup.Konstelacje);
+            EraEffectManager = new EraEffectManager(this, fullGameBackup.EraEffects);
+            EventsInGameManager = new EventsInGameManager(this, fullGameBackup.EventsLists);
+            RepopulateBackupPlayerData(fullGameBackup.PlayerSetData);
+        }
+        public void RepopulateBackupPlayerData(List<PlayerBasicSetData> actions)
+        {
+            foreach(var action in actions)
+            {
+                if(action.Player != Guid.Empty)
+                {
+                    var _player = PlayerManager.GetPlayerById(action.Player);
+                    if(_player == null)
+                        continue;
+
+                    if(action.DataType == PlayerBasicSetDataType.BoardAngle)
+                        _player.PlayerAngleBoard.GetAngleById(action.Value1).bChecked = true;
+                    else if(action.DataType == PlayerBasicSetDataType.ResourceAmount)
+                        _player.PlayerResources.GetResourceById(action.Value1).Amount = action.Value2;
+                    else if(action.DataType == PlayerBasicSetDataType.ResourceIncomeAmount)
+                        _player.PlayerResources.GetResourceById(action.Value1).Income = action.Value2;
+                    else if(action.DataType == PlayerBasicSetDataType.ResourceConverter)
+                    {
+                        if(action.Value2 == 1)
+                        {
+                            var dbInfo = GameDataManager.GetResourceConverterById(action.Value1);
+                            _player.PlayerResources.GetResourceById(dbInfo.FromResource).Converters.Add(action.Value1);
+                        }
+                    }
+                    else if(action.DataType == PlayerBasicSetDataType.DeityLevel)
+                        _player.PlayerDeities.GetDeityById(action.Value1).Level = action.Value2;
+                    else if(action.DataType == PlayerBasicSetDataType.RulerCard)
+                        RulerCardsManager.PlayerBackupRulerCard(_player, action.Value1);
+                    else if(action.DataType == PlayerBasicSetDataType.ScorePoints)
+                        _player.Points = action.Value1;
+                    else if(action.DataType == PlayerBasicSetDataType.WarfareScore)
+                        _player.WarfareScore = action.Value1;
+                    else if(action.DataType == PlayerBasicSetDataType.Luxury)
+                        _player.PlayerLuxuries.GetLuxuryById(action.Value1).Amount = action.Value2;
+                    else if(action.DataType == PlayerBasicSetDataType.AuraEffect)
+                        _player.AuraEffects.Add(action.Value1);
+                }
+            }
+        }
 
         public void StartGame()
         {
@@ -79,8 +136,13 @@ namespace BoardGameBackend.Managers
             };
             EventManager.Broadcast("GameStarted", ref data);
             ActionManager.ActionInitialized();
-
             PhaseManager.DoCheckCurrentPhase();
+        }
+
+        public void CreateBackupLobbyGame()
+        {
+            RequestBackupData data = new RequestBackupData(){GameId = GameId};
+            EventManager.Broadcast("GameRequestBackup", ref data);
         }
     }
 }

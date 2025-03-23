@@ -46,6 +46,27 @@ namespace BoardGameBackend.Managers
                 case 20:
                     ScoreForCityWithStelae(ge);
                     break;
+                case 29: case 30: case 31: case 32: case 33: case 34:
+                    ScoreForDeity(ge);
+                    break;
+                case 35:
+                    AddSpecialistIfZero(ge);
+                    break;
+                case 36:
+                    AddCapitalExpand(ge);
+                    break;
+                case 37:
+                    RemoveCapitalExpand(ge);
+                    break;
+                case 38:
+                    LooseHalfWarfareScore(ge);
+                    break;
+                case 39:
+                    ScoreForCityStack(ge);
+                    break;
+                case 40: case 41: case 42: case 43: case 44:
+                    DoQueueExtraPhaseAction(ge);
+                    break;
                 default:
                     Console.WriteLine("Missing event handler for " + iKey.ToString());
                     break;
@@ -121,6 +142,20 @@ namespace BoardGameBackend.Managers
                 _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
             }
         }
+        public void ScoreForDeity(GameEventSendData ge)
+        {
+            var dbinfo = GameDataManager.GetEventById(ge.IntValue1);
+            int deityid = dbinfo.EffectVal1;
+            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.SimpleScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                int iScore = p.PlayerDeities.GetDeityById(deityid).Level;
+                lrow.Value1 = iScore;
+                ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
+            }
+        }
         public void HeavyRespecEffect(GameEventSendData ge)
         {
             var dbinfo = GameDataManager.GetEventById(ge.IntValue1);
@@ -159,6 +194,72 @@ namespace BoardGameBackend.Managers
                 player.VisionAngle = (player.VisionAngle + rotateval + 6) % 6;
             }
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = Guid.Empty, DataType = PlayerBasicSetDataType.BoardRotation, Value1 = rotateval});
+        }
+        public void AddSpecialistIfZero(GameEventSendData ge)
+        {
+           foreach(var p in _gameContext.PlayerManager.Players)
+            {
+                foreach(var res in p.PlayerResources.Resources)
+                {
+                    if(res.Amount == 0)
+                    {
+                        _gameContext.PlayerManager.ChangeResourceAmount(p, res.Id, 1);
+                    }
+                }
+            }
+        }
+        public void AddCapitalExpand(GameEventSendData ge)
+        {
+           foreach(var p in _gameContext.PlayerManager.Players)
+            {
+                var tile = _gameContext.BoardManager.GetCapitalCity(p.Id);
+                if(tile != null)
+                {
+                    _gameContext.BoardManager.CityExpands(p, tile.dbData.Id);
+                }
+            }
+        }
+        public void RemoveCapitalExpand(GameEventSendData ge)
+        {
+           foreach(var p in _gameContext.PlayerManager.Players)
+            {
+                var tile = _gameContext.BoardManager.GetCapitalCity(p.Id);
+                if(tile != null)
+                {
+                    _gameContext.BoardManager.CityLoosesExpansion(p, tile.dbData.Id);
+                }
+            }
+        }
+        public void LooseHalfWarfareScore(GameEventSendData ge)
+        {
+           foreach(var p in _gameContext.PlayerManager.Players)
+            {
+                int iReduce = p.WarfareScore / 2;
+                if(iReduce > 0)
+                    _gameContext.PlayerManager.ChangeWarfareScore(p, -iReduce);
+            }
+        }
+        public void ScoreForCityStack(GameEventSendData ge)
+        {
+            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.SimpleScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                int iScore = _gameContext.BoardManager.GetCityStackAmount(p.Id);
+                lrow.Value1 = iScore;
+                ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
+            }          
+        }
+
+        public void DoQueueExtraPhaseAction(GameEventSendData ge)
+        {
+            int pInOrder = _gameContext.PlayerManager.Players.Count - 1;
+            foreach(var player in _gameContext.PlayerManager.GetPlayersInReverseOrder())
+            {
+                _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.SpecialPlayerAction, ActivePlayers = new List<Guid>(), Value1 = ge.IntValue1, Value2 = pInOrder});
+                pInOrder--;
+            }
         }
     }
 }

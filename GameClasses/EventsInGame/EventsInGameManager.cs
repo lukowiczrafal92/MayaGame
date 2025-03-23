@@ -15,6 +15,22 @@ namespace BoardGameBackend.Managers
         public List<int> EventsEraThreeRound1 = new List<int>();
         public List<int> EventsEraThreeRound2 = new List<int>();
         private EventsInGameEffectManager EventsInGameEffectManager;
+
+        public EventsInGameManager(GameContext gameContext, List<List<int>> fullData)
+        {
+            _gameContext = gameContext;
+            EventsInGameEffectManager = new EventsInGameEffectManager(gameContext);
+            
+            if(!gameContext.GameOptions.AgeCards)
+                return;
+
+            EventsEraOneRound1 = fullData[0];
+            EventsEraOneRound2 = fullData[1];
+            EventsEraTwoRound1 = fullData[2];
+            EventsEraTwoRound2 = fullData[3];
+            EventsEraThreeRound1 = fullData[4];
+            EventsEraThreeRound2 = fullData[5];
+        }
         public EventsInGameManager(GameContext gameContext)
         {
             _gameContext = gameContext;
