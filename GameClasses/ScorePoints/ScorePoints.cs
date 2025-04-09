@@ -21,17 +21,20 @@ namespace BoardGameBackend.Managers
                 var crow = new PlayerTableRow(){Player = p.Id};
                 int iScoreFromCapital = 0;
                 int iExpansion = _gameContext.BoardManager.GetCapitalCityLevel(p.Id);
+                int iCities = _gameContext.BoardManager.GetNumCities(p.Id);
                 if(iExpansion > 0)
                 {
                     iScoreFromCapital += iExpansion;
                     foreach(var op in _gameContext.PlayerManager.Players)
                     {
-                        if(iExpansion > _gameContext.BoardManager.GetCapitalCityLevel(op.Id))
+                        int iRivalCapital = _gameContext.BoardManager.GetCapitalCityLevel(op.Id);
+                        if(iExpansion > iRivalCapital || (iExpansion == iRivalCapital && iCities > _gameContext.BoardManager.GetNumCities(op.Id)))
                             iScoreFromCapital++;
                     }
                 }
                 crow.Value1 = iExpansion;
-                crow.Value2 = iScoreFromCapital;
+                crow.Value2 = iCities;
+                crow.Value3 = iScoreFromCapital;
                 gept.ListPlayerRows.Add(crow);
                 _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromCapital, sctype);
             }
@@ -86,7 +89,7 @@ namespace BoardGameBackend.Managers
         public void TriggerEndEra()
         {
             GameEventSendData ge = new GameEventSendData(){gameEventSendType = GameEventSendType.EraEnd};
-            ge.gameEventPlayerTable = EndEraWarfarePoints(ScorePointType.EraWarfare);
+        //    ge.gameEventPlayerTable = EndEraWarfarePoints(ScorePointType.EraWarfare);
             ge.gameEventPlayerTableTwo = EndEraLuxuryPoints(ScorePointType.Luxuries);
             ge.gameEventPlayerTableThird = EndEraCapitalPoints(ScorePointType.DuringGameCapitalCity);
             ge.IntValue1 = _gameContext.EraEffectManager.EndCurrentEraEffect();
@@ -170,7 +173,7 @@ namespace BoardGameBackend.Managers
 
             foreach (var player in players)
             {
-                playerScores[player.Id] = new ScorePointsTable();
+                playerScores[player.Id] = new ScorePointsTable(){ActionsMade = player.actionsMade};
             }
 
             foreach (var player in players)
@@ -188,6 +191,10 @@ namespace BoardGameBackend.Managers
                 scoreTable.Luxuries = player.GetScoreFromSource(ScorePointType.Luxuries);
                 scoreTable.DuringGameAngle = player.GetScoreFromSource(ScorePointType.DuringGameAngle);
                 scoreTable.ErasAndEvents = player.GetScoreFromSource(ScorePointType.ErasAndEvents);
+                scoreTable.JokersUsed = player.GetPlayerLogData(PlayerLogTypes.JokerActions);
+                scoreTable.RespecializationsMade = player.GetPlayerLogData(PlayerLogTypes.Respecializations);
+                scoreTable.SpecialistsUsed = player.GetPlayerLogData(PlayerLogTypes.SpecialistsUsed);
+                scoreTable.SpecialistsBurnt = player.GetPlayerLogData(PlayerLogTypes.SpecialistsBurnt);
             }
 
             var sortedPlayerScores = playerScores

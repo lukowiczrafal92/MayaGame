@@ -64,8 +64,17 @@ namespace BoardGameBackend.Managers
                 case 39:
                     ScoreForCityStack(ge);
                     break;
-                case 40: case 41: case 42: case 43: case 44:
+                case 40: case 41: case 42: case 43: case 44: case 45: case 47: case 50: case 51: case 52: case 53: case 54: case 55:
                     DoQueueExtraPhaseAction(ge);
+                    break;
+                case 46:
+                    ScoreForRulers(ge);
+                    break;
+                case 48:
+                    ScoreForThreeAngles(ge, 90, 210, 330);
+                    break;
+                case 49:
+                    ScoreForThreeAngles(ge, 30, 150, 270);
                     break;
                 default:
                     Console.WriteLine("Missing event handler for " + iKey.ToString());
@@ -84,12 +93,16 @@ namespace BoardGameBackend.Managers
         {
             foreach(var p in _gameContext.PlayerManager.Players)
             {
-                int setresource = 0;
+                int burntResources = 0;
                 foreach(var res in p.PlayerResources.Resources)
                 {
                     if(res.Amount > 0)
+                    {
+                        burntResources += res.Amount;
                         _gameContext.PlayerManager.SetResourceAmount(p, res.Id, 0);
+                    }
                 }
+                p.LogPlayerData(PlayerLogTypes.SpecialistsBurnt, burntResources);
             }
         }
 
@@ -179,7 +192,10 @@ namespace BoardGameBackend.Managers
                 }
 
                 if(setresource > GameConstants.MAX_RESOURCE_STORAGE)
+                {
+                    p.LogPlayerData(PlayerLogTypes.SpecialistsBurnt, setresource - GameConstants.MAX_RESOURCE_STORAGE);
                     setresource = GameConstants.MAX_RESOURCE_STORAGE;
+                }
                 
                 _gameContext.PlayerManager.SetResourceAmount(p, resourceId, setresource);
             }
@@ -246,6 +262,50 @@ namespace BoardGameBackend.Managers
             {
                 var lrow = new PlayerTableRow(){Player = p.Id};
                 int iScore = _gameContext.BoardManager.GetCityStackAmount(p.Id);
+                lrow.Value1 = iScore;
+                ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
+            }          
+        }
+
+
+        public void ScoreForRulers(GameEventSendData ge)
+        {
+            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.SimpleScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                int iScore = p.Rulers.Count;
+                lrow.Value1 = iScore;
+                ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
+            }          
+        }
+
+        public void ScoreForThreeAngles(GameEventSendData ge, int iAngle1, int iAngle2, int iAngle3)
+        {
+            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.SimpleScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                int iAngles = 0;
+                int iScore = 0;
+
+                if(p.PlayerAngleBoard.HasAngleByValueChecked(iAngle1))
+                    iAngles++;
+                    
+                if(p.PlayerAngleBoard.HasAngleByValueChecked(iAngle2))
+                    iAngles++;
+
+                if(p.PlayerAngleBoard.HasAngleByValueChecked(iAngle3))
+                    iAngles++;
+
+                if(iAngles == 1)
+                    iScore = 1;
+                else if(iAngles == 2)
+                    iScore = 3;
+                else if(iAngles == 3)
+                    iScore = 6;
                 lrow.Value1 = iScore;
                 ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
                 _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);

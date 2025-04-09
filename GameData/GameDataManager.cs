@@ -112,6 +112,9 @@ namespace BoardGameBackend.GameData
         public static List<RulerGameData> GetRulers(){
             return lRulers;
         }
+        public static AngleBoardTile GetAngleById(int id){
+            return lAngleBoardTiles.FirstOrDefault(tile => tile.Id == id)!;
+        }
         public static List<AngleBoardTile> GetAngleBoardTiles(){
             return lAngleBoardTiles;
         }

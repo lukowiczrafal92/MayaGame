@@ -36,6 +36,11 @@ namespace BoardGameBackend.Models
         {
             return Angles.FirstOrDefault(h => h.dbInfo.Angle == iAngle && h.dbInfo.Distance == iDistance);
         }
+
+        public bool HasAngleByValueChecked(int iAngle)
+        {
+            return Angles.FirstOrDefault(h => h.dbInfo.Angle == iAngle && h.bChecked) != null;
+        }
     }
     public class PlayerAngleBoardTile
     {

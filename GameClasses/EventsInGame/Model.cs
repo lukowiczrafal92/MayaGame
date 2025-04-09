@@ -8,5 +8,6 @@ namespace BoardGameBackend.Models
         public int GroupType {get; set;}
         public int EffectVal1 {get; set;}
         public int EffectVal2 {get; set;}
+        public int EffectVal3 {get; set;}
     }
 }

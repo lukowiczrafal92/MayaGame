@@ -26,6 +26,33 @@ namespace BoardGameBackend.Managers
         {
           return Deities.FirstOrDefault(d => d.Id == id);
         }
+
+        public int GetDeitiesAtLevelOrGreater(int iLevel)
+        {
+          int iCount = 0;
+          foreach(var deity in Deities)
+          {
+            if(deity.Level >= iLevel)
+              iCount++;
+          }
+          return iCount;
+        }
+
+        public bool HasTwoDeitiesWithDifferentLevels()
+        {
+            int iLevelCheck = -1;
+            foreach(var deity in Deities)
+            {
+              if(deity.Level != iLevelCheck)
+              {
+                if(iLevelCheck == -1)
+                  iLevelCheck = deity.Level;
+                else
+                  return true;
+              }
+            }
+          return false;
+        }
         public PlayerDeity GetDeityByResource(int resid)
         {
           return Deities.FirstOrDefault(d => d.Resource == resid);

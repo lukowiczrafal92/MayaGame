@@ -95,7 +95,8 @@ namespace BoardGameBackend.Managers
             {
                player.Rulers.Add(newruler);
                _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.RulerCard, Player = player.Id, Value1 = newruler.dbInfo.Id, Value2 = 1});
-               _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.StelaeToken, Player = player.Id, Value1 = tileid, Value2 = newruler.dbInfo.Id});
+            // No more since version 3.
+            //   _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.StelaeToken, Player = player.Id, Value1 = tileid, Value2 = newruler.dbInfo.Id});
                _gameContext.BoardManager.GetTileById(tileid).gameData.RulerStelae = newruler.dbInfo.Id;
                 // effects and other rewards:
                 // Converters for now

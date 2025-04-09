@@ -14,6 +14,14 @@ namespace BoardGameBackend.Models
         DuringGameAngle,
         ErasAndEvents
     }
+
+    public enum PlayerLogTypes
+    {
+        JokerActions,
+        Respecializations,
+        SpecialistsUsed,
+        SpecialistsBurnt
+    }
     public class PointsWithPower{
         public int Points { get; set; } = 0;
         public int Power { get; set; } = 0;
@@ -37,6 +45,11 @@ namespace BoardGameBackend.Models
         public int Luxuries {get; set;} = 0;
         public int DuringGameAngle {get; set;} = 0;
         public int ErasAndEvents {get; set;} = 0;
+        public required Dictionary<int, int> ActionsMade {get; set;}
+        public int JokersUsed {get; set;} = 0;
+        public int RespecializationsMade {get; set;} = 0;
+        public int SpecialistsUsed {get; set;} = 0;
+        public int SpecialistsBurnt {get; set;} = 0;
     }
 
 

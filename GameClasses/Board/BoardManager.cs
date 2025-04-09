@@ -46,6 +46,18 @@ namespace BoardGameBackend.Managers
             return l;
         }
 
+        public bool IsThereAtLeastOneNeutralCityLocation()
+        {
+            foreach(var tile in Tiles)
+            {
+                if(!tile.Jungle && tile.dbData.TileTypeId == 3)
+                {
+                    if(tile.gameData.OwnerId == Guid.Empty)
+                        return true;
+                }
+            }
+            return false; 
+        }
         public int GetPlayerBoardAngleBetween(PlayerInGame player, int fromtile, int totile)
         {
             var ftile = GetTileById(fromtile);
@@ -84,6 +96,11 @@ namespace BoardGameBackend.Managers
             return new List<int[]>(){new int[2]{0, 1}, new int[2]{1, 1}, new int[2]{1, 0}, new int[2]{0, -1}, new int[2]{-1, 0}, new int[2]{-1, 1}};
         }
 
+        public bool IsInRange(int fromTileId, int toTileId, int iRange)
+        {
+            return GetTilesInRange(GetTileById(fromTileId), iRange, false).Contains(GetTileById(toTileId));
+        }
+
         public List<Tile> GetTilesInRange(Tile fromTile, int iRange, bool bExcludeSelf = true)
         {
             List<Tile> inRange = new List<Tile>(){fromTile};
@@ -110,7 +127,21 @@ namespace BoardGameBackend.Managers
             return inRange;
         }
 
-        public void  SetCityOwner(PlayerInGame player, Tile tile)
+        public void CityLost(PlayerInGame player, int tileId)
+        {
+            Tile tile = GetTileById(tileId);
+            if(tile.gameData.Level > 0)
+                CapitalStatusChanged(player, tile, -1, false);
+
+            tile.gameData.OwnerId = Guid.Empty;
+            tile.gameData.Level = 0;
+            _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource1, -1);
+            _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource2, -1);
+            _gameContext.PlayerManager.ChangeLuxuryAmount(player, tile.dbData.LuxuryId, -1);
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = player.Id, DataType = PlayerBasicSetDataType.CityDestroyed, Value1 = tile.dbData.Id});
+        }
+
+        public void SetCityOwner(PlayerInGame player, Tile tile)
         {
             if(tile.gameData.OwnerId != Guid.Empty)
             {
@@ -180,6 +211,15 @@ namespace BoardGameBackend.Managers
             return tile.gameData.Level;
         }
 
+        public int GetFirstPlayerCity(Guid playerId)
+        {
+            foreach(var tile in Tiles)
+            {
+                if(tile.gameData.OwnerId == playerId)
+                    return tile.dbData.Id;
+            }
+            return -1;
+        }
         public int GetNumCities(Guid playerId)
         {
             int cc = 0;

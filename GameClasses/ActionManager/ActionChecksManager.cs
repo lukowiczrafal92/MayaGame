@@ -30,7 +30,7 @@ namespace BoardGameBackend.Managers
                 return HasAnyValidTileCity(player.Id, false, false, true, true);
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.ERECT_STELAE)
             {
-                if(!HasPlayerAtLeastOneCity(player.Id, true))
+                if(!HasPlayerAtLeastOneCity(player.Id))
                     return false;
 
                 return _gameContext.RulerCardsManager.AnyOptionLeft();
@@ -44,6 +44,22 @@ namespace BoardGameBackend.Managers
             }
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.WAR_TRIBUTE)
                 return HasAnyValidTileCity(player.Id, false, true, false, !IsCurrentEraId(10));
+            else if(dbEventInfo.EffectVal1 == (int) ActionTypes.SWAP_DEITIES_LEVELS)
+                return player.PlayerDeities.HasTwoDeitiesWithDifferentLevels();
+            else if(dbEventInfo.EffectVal1 == (int) ActionTypes.LOOSE_CITY)
+            {
+                int iNumCities = _gameContext.BoardManager.GetNumCities(player.Id);
+                if(iNumCities == 1)
+                {
+                    player.LogAction(ActionTypes.LOOSE_CITY);
+                    _gameContext.BoardManager.CityLost(player, _gameContext.BoardManager.GetFirstPlayerCity(player.Id));
+                    return false;
+                }
+                else
+                    return iNumCities > 0;
+            }
+            else if(dbEventInfo.EffectVal1 == (int) ActionTypes.SPECIALISTS_INTO_POINTS)
+                return true;
             
             // special forced do not do if only 1 choice
 

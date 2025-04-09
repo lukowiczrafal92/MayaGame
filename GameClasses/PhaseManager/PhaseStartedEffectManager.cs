@@ -90,6 +90,9 @@ namespace BoardGameBackend.Managers
             //
             _gameContext.PhaseManager.CurrentRound++;
             _gameContext.PhaseManager.CurrentAction = 0;
+// TEST
+//_gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.EndGame, ActivePlayers = new List<Guid>()});
+// TEST
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
@@ -100,6 +103,8 @@ namespace BoardGameBackend.Managers
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
+
+
             List<Guid> p = new List<Guid>();
             foreach(var h in _gameContext.PlayerManager.GetPlayersInOrder())
             {

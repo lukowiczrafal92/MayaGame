@@ -49,6 +49,9 @@ namespace BoardGameBackend.Managers
                 var p = GetPlayerById(data.PlayerId);
                 p.HandActionCards = data.HandActionCards;
                 p.ReserveActionCards = data.ReserveActionCards;
+                p.actionsMade = data.ActionsLog;
+                p.scoreSources = data.ScoreLog;
+                p.playerLogTypes = data.ExtraLog;
             }
         }
 
@@ -88,7 +91,8 @@ namespace BoardGameBackend.Managers
         {
             List<PlayerBackupActionCards> lpa = new List<PlayerBackupActionCards>();
             foreach(var p in Players)
-                lpa.Add(new PlayerBackupActionCards(){PlayerId = p.Id, HandActionCards = p.HandActionCards, ReserveActionCards = p.ReserveActionCards});
+                lpa.Add(new PlayerBackupActionCards(){PlayerId = p.Id, HandActionCards = p.HandActionCards, ReserveActionCards = p.ReserveActionCards,
+                ScoreLog = p.scoreSources, ActionsLog = p.actionsMade, ExtraLog = p.playerLogTypes});
 
             return lpa;
         }
@@ -182,12 +186,35 @@ namespace BoardGameBackend.Managers
                 _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.DeityLevel, Value1 = iDeityID, Value2 = p.PlayerDeities.GetDeityById(iDeityID).Level});
             }
         }
+
+        public void SwapDeityLevels(PlayerInGame p, int iDeityOne, int iDeityTwo)
+        {
+            var d1 = p.PlayerDeities.GetDeityById(iDeityOne);
+            var d2 = p.PlayerDeities.GetDeityById(iDeityTwo);
+            int iLevel1 = d1.Level;
+            int iLevel2 = d2.Level;
+            if(iLevel1 == 3)
+            {
+                ChangeLuxuryAmount(p, d1.Luxury, -1);
+                ChangeLuxuryAmount(p, d2.Luxury, 1);
+            }
+            if(iLevel2 == 3)
+            {
+                ChangeLuxuryAmount(p, d1.Luxury, 1);
+                ChangeLuxuryAmount(p, d2.Luxury, -1);
+            }
+            d1.Level = iLevel2;
+            d2.Level = iLevel1;
+
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.DeityLevel, Value1 = iDeityOne, Value2 = p.PlayerDeities.GetDeityById(iDeityOne).Level});
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.DeityLevel, Value1 = iDeityTwo, Value2 = p.PlayerDeities.GetDeityById(iDeityTwo).Level});
+        }
         public void IncreaseDeityLevel(PlayerInGame p, int iDeityID)
         {
             var deity = p.PlayerDeities.GetDeityById(iDeityID);
             if(deity.Level == 3) // NOW MAX LEVEL :>
             {
-                ChangeScorePoints(p, GameConstants.DEITY_LVL_FIVE_POINTS + deity.TieBreaker * GameConstants.DEITY_LVL_FOUR_PER_PATRON, ScorePointType.DuringGameDeity);
+                ChangeScorePoints(p, GameConstants.DEITY_LVL_FIVE_POINTS + deity.TieBreaker * GameConstants.DEITY_LVL_FOUR_PER_PATRON + GameConstants.DEITY_LVL_FOUR_PER_LVL3 * p.PlayerDeities.GetDeitiesAtLevelOrGreater(3), ScorePointType.DuringGameDeity);
             }   
             else
             {
@@ -208,18 +235,39 @@ namespace BoardGameBackend.Managers
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.Luxury, Value1 = iLuxuryId, Value2 = p.PlayerLuxuries.GetLuxuryById(iLuxuryId).Amount});
         }
 
-        public void CheckAngle(PlayerInGame p, int angle)
+        public bool IsThisAngleScoreWorthy(int angle)
         {
-            bool bAnyPlayerHasAngle = false;
-            foreach(var player in Players)
+            AngleScoreTypes aType = _gameContext.GameOptions.AngleScoreType;
+            if(aType == AngleScoreTypes.NO_SCORE)
+                return false;
+            else if(aType == AngleScoreTypes.ANY_TILE)
             {
-                if(player.PlayerAngleBoard.GetAngleById(angle).bChecked)
+                foreach(var player in Players)
                 {
-                    bAnyPlayerHasAngle = true;
-                    break;
+                    if(player.PlayerAngleBoard.GetAngleById(angle).bChecked)
+                    {
+                       return false;
+                    }
                 }
             }
-            if(!bAnyPlayerHasAngle)
+            else if(aType == AngleScoreTypes.ONLY_ANGLE)
+            {
+                var dbinfo = GameDataManager.GetAngleById(angle);
+                foreach(var player in Players)
+                {
+                    foreach(var pangle in player.PlayerAngleBoard.Angles)
+                    {
+                        if(pangle.bChecked && pangle.dbInfo.Angle == dbinfo.Angle)
+                            return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public void CheckAngle(PlayerInGame p, int angle)
+        {
+            if(IsThisAngleScoreWorthy(angle))
             {
                 ChangeScorePoints(p, 1, ScorePointType.DuringGameAngle);
                 if(_gameContext.EraEffectManager.CurrentAgeCardId == 16)
@@ -266,6 +314,7 @@ namespace BoardGameBackend.Managers
 
         public void ApplyResourceConverter(PlayerInGame p, ResourceConverterGameData data)
         {
+            p.LogPlayerData(PlayerLogTypes.Respecializations);
             ChangeResourceAmount(p, data.FromResource, -1 * data.FromValue);
             ChangeResourceAmount(p, data.ToResource, data.ToValue);
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.LogRespecialization, Player = p.Id, Value1 = data.Id});
@@ -304,7 +353,10 @@ namespace BoardGameBackend.Managers
                     if(resource.Converters.Count > 0)
                         bNeed = true;
                     else
+                    {
+                        p.LogPlayerData(PlayerLogTypes.SpecialistsBurnt, resource.Amount - GameConstants.MAX_RESOURCE_STORAGE);
                         SetResourceAmount(p, resource.Id, GameConstants.MAX_RESOURCE_STORAGE);
+                    }
                 }
             }
             return bNeed;
@@ -316,6 +368,7 @@ namespace BoardGameBackend.Managers
             {
                 if(resource.Amount > GameConstants.MAX_RESOURCE_STORAGE)
                 {
+                    p.LogPlayerData(PlayerLogTypes.SpecialistsBurnt, resource.Amount - GameConstants.MAX_RESOURCE_STORAGE);
                     SetResourceAmount(p, resource.Id, GameConstants.MAX_RESOURCE_STORAGE);
                 }
             }

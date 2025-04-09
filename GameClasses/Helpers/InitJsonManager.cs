@@ -5,13 +5,15 @@ namespace BoardGameBackend.Helpers
         private static Dictionary<string, string> jsonDictionary = new Dictionary<string, string>();
         
         private static List<string> ChangelogList = new List<string>(){
-            "System backupów. Po restarcie serwera nie utracimy danych o rozgrywce.",
-            "Podbity gracz otrzymuje po 1 specjaliście z miasta jako rekompensatę.",
-            "Pielgrzymka (akcja) została podzielona na dwie akcje: Obrzędy (miasto gracza) i Pielgrzymkę (miasto rywala).",
-            "Zestawy bóstw nie punktują na koniec gry.",
-            "Gracz nie punktuje za poziomy bóstw jeżeli jest na poziomie 0 (nawet jeśli jest od kogoś 'lepszy' z patronów władców).",
-            "Karty ery: 20 (+8).",
-            "Karty wydarzeń: 44 (+16)."
+            "Karty ery: 20 (-3; +3).",
+            "Karty wydarzeń: 52 (-3; +11).",
+            "Czwarty poziom religii daje teraz 1 punkt za każde bóstwo na 3 poziomie.",
+            "Pielgrzymka jest teraz jedyną akcją z klasy religii. Może celować w dowolne miasto (nawet neutralne).",
+            "Żetony steli zostały usunięte (ich wymagania też). Rozbudowa (rzeźbiarstwo) wymaga 4 władców.",
+            "Dodano nowe opcje (akcje specjalistyczne) (punktowanie za pierwsze kąty).",
+            "Żetony wojny usunięte. Wojna o Trybut daje teraz dodatkowo 1 wybranego przez gracza specjalistę.",
+            "Podbój jest teraz opcją Wojny Gwiezdnej (która kosztuje 4 wojowników i może celować w każde miasto przeciwnika). Nowe zasady podboju w instrukcji.",
+            "Nowe zasady rozbudowy w instrukcji."
         };
         static InitJsonManager()
         {   

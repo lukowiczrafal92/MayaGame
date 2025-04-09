@@ -1,4 +1,5 @@
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 
 namespace BoardGameBackend.Models
 {
@@ -58,6 +59,15 @@ namespace BoardGameBackend.Models
         public required Guid PlayerId {get; set;}
         public required List<ActionCard> HandActionCards {get; set;}
         public required List<ActionCard> ReserveActionCards {get; set;}
+        
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfArrays)]
+        public required Dictionary<int, int> ScoreLog {get; set;}
+        
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfArrays)]
+        public required Dictionary<int, int> ActionsLog {get; set;}
+        
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfArrays)]
+        public required Dictionary<int, int> ExtraLog {get; set;}
     }
 
     public class FullPlayerData

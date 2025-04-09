@@ -5,10 +5,13 @@ namespace BoardGameBackend.Models
         public bool AgeCards {get; set;} = true;
         public bool ThreeStar {get; set;} = true;
         public bool AllowRotateConstellations {get; set;} = true;
+        public bool SpecialActions {get; set;} = false;
+        public AngleScoreTypes AngleScoreType { get; set; } = AngleScoreTypes.ONLY_ANGLE;
     }
-
-    public enum TurnTypes{
-        PHASE_BY_PHASE,
-        FULL_TURN
+    public enum AngleScoreTypes
+    {
+        ONLY_ANGLE,
+        ANY_TILE,
+        NO_SCORE
     }
 }

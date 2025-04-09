@@ -69,6 +69,9 @@ namespace BoardGameBackend.Models
         SKY_RULER_STAR,
         ERA_MERCENARIES,
         PILGRIMAGE_RIVAL,
-        MIRRORED_ANGLE
+        MIRRORED_ANGLE,
+        SWAP_DEITIES_LEVELS,
+        LOOSE_CITY,
+        SPECIALISTS_INTO_POINTS
     }
 }

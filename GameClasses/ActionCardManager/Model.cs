@@ -19,6 +19,9 @@ namespace BoardGameBackend.Models
         public required bool ShowCardAll {get; set;}
         public required int PerCityCost100 {get; set;}
         public required int RequiresEffectId {get; set;}
+        public required bool SpecialExtra {get; set;}
+        public required int MaxCost {get; set;}
+
     }
     public class ActionCard
     {

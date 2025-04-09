@@ -239,7 +239,7 @@ namespace BoardGameBackend.Hubs
             {
                 await Clients.Group(lobbyId).SendAsync("DestroyLobby", player);
             }
-            Console.WriteLine("Tutaj odpala się.");
+            Console.WriteLine("LobbyHub zniszczone.");
             _backupService.DeleteLobbyId(lobbyId);
         }
 
