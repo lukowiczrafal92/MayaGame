@@ -41,7 +41,6 @@ namespace BoardGameBackend.Managers
             _gameContext.ActionCardManager.CreateActionCardDeck();
             _gameContext.PhaseManager.CurrentEra++;
             _gameContext.PhaseManager.CurrentRound = 0;
-            _gameContext.RulerCardsManager.OnAgeStart();
 
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.RoundEnd, ActivePlayers = new List<Guid>()});
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.RoundStart, ActivePlayers = new List<Guid>()});
@@ -57,6 +56,7 @@ namespace BoardGameBackend.Managers
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.RoundStart, ActivePlayers = new List<Guid>()});
 
             _gameContext.EraEffectManager.TriggerNextEra();
+            _gameContext.RulerCardsManager.OnAgeStart(false);
         }
 
         public void OnEventInGame(Phase? phase)

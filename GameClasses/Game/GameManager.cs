@@ -136,6 +136,9 @@ namespace BoardGameBackend.Managers
                 if(p.Points != 0)
                     nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.ScorePoints, Value1 = p.Points});
 
+                if(p.EndPoints != 0)
+                    nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.EstScoreEnd, Value1 = p.EndPoints});
+
                 if(p.WarfareScore != 0)
                     nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.WarfareScore, Value1 = p.WarfareScore});
 

@@ -24,7 +24,9 @@ namespace BoardGameBackend.Models
         BoardRotation,
         RemoveAuraEffect,
         CityLevel,
-        CityDestroyed
+        CityDestroyed,
+        AngleLost,
+        EstScoreEnd
     }
 
     public enum PlayerTableType

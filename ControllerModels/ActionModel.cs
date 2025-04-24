@@ -72,6 +72,9 @@ namespace BoardGameBackend.Models
         MIRRORED_ANGLE,
         SWAP_DEITIES_LEVELS,
         LOOSE_CITY,
-        SPECIALISTS_INTO_POINTS
+        SPECIALISTS_INTO_POINTS,
+        LOOSE_ANGLE,
+        RULER_DEITY,
+        TRADE_POINTS
     }
 }

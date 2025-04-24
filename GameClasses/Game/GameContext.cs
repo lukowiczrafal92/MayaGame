@@ -92,6 +92,8 @@ namespace BoardGameBackend.Managers
                         _player.PlayerLuxuries.GetLuxuryById(action.Value1).Amount = action.Value2;
                     else if(action.DataType == PlayerBasicSetDataType.AuraEffect)
                         _player.AuraEffects.Add(action.Value1);
+                    else if(action.DataType == PlayerBasicSetDataType.EstScoreEnd)
+                        _player.EndPoints = action.Value1;
                 }
             }
         }

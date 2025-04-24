@@ -10,6 +10,7 @@ namespace BoardGameBackend.Models
         public Guid Id { get; private set; }
         public string Name { get; private set; }
         public int Points { get; set; } = 0;
+        public int EndPoints {get; set; } = 0;
         public int WarfareScore { get; set; } = 0;
         public int VisionAngle { get; set; } = 0;
         public int CurrentOrder {get; set; } = -1;
@@ -75,6 +76,14 @@ namespace BoardGameBackend.Models
                 return playerLogTypes[iKey];
            
            return 0;
+        }
+
+        public bool HasRulerWithDeity(int iDeityId)
+        {
+            foreach(var ruler in Rulers.Where(r => r.dbInfo.DeityId == iDeityId))
+                return true;
+                
+            return false;
         }
     }
 

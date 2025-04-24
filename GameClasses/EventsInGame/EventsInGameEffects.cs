@@ -64,7 +64,7 @@ namespace BoardGameBackend.Managers
                 case 39:
                     ScoreForCityStack(ge);
                     break;
-                case 40: case 41: case 42: case 43: case 44: case 45: case 47: case 50: case 51: case 52: case 53: case 54: case 55:
+                case 40: case 41: case 42: case 43: case 44: case 45: case 47: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 58:
                     DoQueueExtraPhaseAction(ge);
                     break;
                 case 46:
@@ -75,6 +75,9 @@ namespace BoardGameBackend.Managers
                     break;
                 case 49:
                     ScoreForThreeAngles(ge, 30, 150, 270);
+                    break;
+                case 57:
+                    AddPointIfZero(ge);
                     break;
                 default:
                     Console.WriteLine("Missing event handler for " + iKey.ToString());
@@ -136,7 +139,7 @@ namespace BoardGameBackend.Managers
 
         public void RerollRulers(GameEventSendData ge)
         {
-            _gameContext.RulerCardsManager.OnAgeStart();
+            _gameContext.RulerCardsManager.OnAgeStart(true);
         }
         public void ScoreForCityWithStelae(GameEventSendData ge)
         {
@@ -210,6 +213,24 @@ namespace BoardGameBackend.Managers
                 player.VisionAngle = (player.VisionAngle + rotateval + 6) % 6;
             }
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = Guid.Empty, DataType = PlayerBasicSetDataType.BoardRotation, Value1 = rotateval});
+        }
+
+        public void AddPointIfZero(GameEventSendData ge)
+        {
+            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.SimpleScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                int iScore = 0;
+                foreach(var res in p.PlayerResources.Resources)
+                {
+                    if(res.Amount == 0)
+                        iScore++;
+                }
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                lrow.Value1 = iScore;
+                ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
+            }       
         }
         public void AddSpecialistIfZero(GameEventSendData ge)
         {

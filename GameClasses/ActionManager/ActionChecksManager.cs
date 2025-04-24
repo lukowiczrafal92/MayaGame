@@ -27,7 +27,7 @@ namespace BoardGameBackend.Managers
             if(dbEventInfo.EffectVal1 == (int) ActionTypes.PILGRIMAGE)
                 return HasPlayerAtLeastOneCity(player.Id);
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.FOUND_CITY)
-                return HasAnyValidTileCity(player.Id, false, false, true, true);
+                return HasAnyValidTileCity(player.Id, false, false, true, !IsCurrentEraId(10));
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.ERECT_STELAE)
             {
                 if(!HasPlayerAtLeastOneCity(player.Id))
@@ -44,6 +44,24 @@ namespace BoardGameBackend.Managers
             }
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.WAR_TRIBUTE)
                 return HasAnyValidTileCity(player.Id, false, true, false, !IsCurrentEraId(10));
+            else if(dbEventInfo.EffectVal1 == (int) ActionTypes.WAR_STAR)
+            {
+                foreach(var tile in _gameContext.BoardManager.Tiles)
+                {
+                    if(!tile.Jungle && tile.dbData.TileTypeId == 3)
+                    {
+                        if(tile.gameData.OwnerId != player.Id)
+                        {
+                            if(IsCurrentEraId(10) || HasUserCityAdjacentTo(player.Id, tile))
+                            {
+                                if(CanDoAnyStarWarsRewardFromTile(player, tile))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.SWAP_DEITIES_LEVELS)
                 return player.PlayerDeities.HasTwoDeitiesWithDifferentLevels();
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.LOOSE_CITY)
@@ -60,6 +78,24 @@ namespace BoardGameBackend.Managers
             }
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.SPECIALISTS_INTO_POINTS)
                 return true;
+            else if(dbEventInfo.EffectVal1 == (int) ActionTypes.LOOSE_ANGLE)
+            {
+                int iAngle = -1;
+                foreach(var angle in player.PlayerAngleBoard.Angles.Where(a => a.bChecked))
+                {
+                    if(iAngle == -1)
+                        iAngle = angle.dbInfo.Id;
+                    else
+                        return true;
+                }
+
+                if(iAngle != -1)
+                {
+                    _gameContext.PlayerManager.MakePlayerLooseAngle(player, iAngle);
+                    player.LogAction(ActionTypes.LOOSE_ANGLE);
+                }
+                return false;
+            }
             
             // special forced do not do if only 1 choice
 
@@ -147,6 +183,31 @@ namespace BoardGameBackend.Managers
                         }
                     }
                 }
+            }
+            return false;
+        }
+        public bool CanDoAnyStarWarsRewardFromTile(PlayerInGame player, Tile tile)
+        {
+            if(tile.gameData.OwnerId == Guid.Empty)
+                return false;
+
+            var targetplayer = _gameContext.PlayerManager.GetPlayerById(tile.gameData.OwnerId);
+            foreach(var deity in targetplayer.PlayerDeities.Deities)
+            {
+                if(deity.Level > player.PlayerDeities.GetDeityById(deity.Id).Level)
+                    return true;
+            }
+
+            foreach(var angle in targetplayer.PlayerAngleBoard.Angles)
+            {
+                if(angle.bChecked && !player.PlayerAngleBoard.GetAngleByXY(angle.dbInfo.X, angle.dbInfo.Y).bChecked)
+                    return true;
+            }
+
+            if(_gameContext.ActionManager.CanConquerEnemyCity(targetplayer.Id, player.Id))
+            {
+                if(tile.gameData.Level == 0)
+                    return true;
             }
             return false;
         }

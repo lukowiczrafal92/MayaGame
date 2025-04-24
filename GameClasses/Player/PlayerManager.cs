@@ -119,6 +119,9 @@ namespace BoardGameBackend.Managers
 
         public void ClaimOrderForNextTurn(PlayerInGame p)
         {
+            if(p.IncomingOrder != -1)
+                return;
+                
             int iNextOrder = 0;
             if(_gameContext.EraEffectManager.CurrentAgeCardId == 3)
             {
@@ -175,6 +178,15 @@ namespace BoardGameBackend.Managers
             p.Points += amount;
             p.ChangeScoreSource(spType, amount);
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.ScorePoints, Value1 = p.Points});
+        }
+
+        public void SetEstimatedScorePoints(PlayerInGame p, int amount)
+        {
+            if(amount == p.EndPoints)
+                return;
+
+            p.EndPoints = amount;
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.EstScoreEnd, Value1 = p.EndPoints});
         }
 
         public void ReduceDeityLevel(PlayerInGame p, int iDeityID)
@@ -265,6 +277,11 @@ namespace BoardGameBackend.Managers
             return true;
         }
 
+        public void MakePlayerLooseAngle(PlayerInGame p, int angle)
+        {
+            p.PlayerAngleBoard.GetAngleById(angle).bChecked = false;
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.AngleLost, Value1 = angle});
+        }
         public void CheckAngle(PlayerInGame p, int angle)
         {
             if(IsThisAngleScoreWorthy(angle))
@@ -299,6 +316,11 @@ namespace BoardGameBackend.Managers
                 int deitylevel = p.PlayerDeities.GetDeityByResource(resid).Level;
                 if(deitylevel > income)
                     return deitylevel;
+            }
+            if(_gameContext.EraEffectManager.CurrentAgeCardId == 28)
+            {
+                if(income > 2)
+                    return 2;
             }
             return income;
         }

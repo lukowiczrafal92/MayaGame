@@ -5,15 +5,13 @@ namespace BoardGameBackend.Helpers
         private static Dictionary<string, string> jsonDictionary = new Dictionary<string, string>();
         
         private static List<string> ChangelogList = new List<string>(){
-            "Karty ery: 20 (-3; +3).",
-            "Karty wydarzeń: 52 (-3; +11).",
-            "Czwarty poziom religii daje teraz 1 punkt za każde bóstwo na 3 poziomie.",
-            "Pielgrzymka jest teraz jedyną akcją z klasy religii. Może celować w dowolne miasto (nawet neutralne).",
-            "Żetony steli zostały usunięte (ich wymagania też). Rozbudowa (rzeźbiarstwo) wymaga 4 władców.",
-            "Dodano nowe opcje (akcje specjalistyczne) (punktowanie za pierwsze kąty).",
-            "Żetony wojny usunięte. Wojna o Trybut daje teraz dodatkowo 1 wybranego przez gracza specjalistę.",
-            "Podbój jest teraz opcją Wojny Gwiezdnej (która kosztuje 4 wojowników i może celować w każde miasto przeciwnika). Nowe zasady podboju w instrukcji.",
-            "Nowe zasady rozbudowy w instrukcji."
+            "Karty ery: 27 (+7).",
+            "Karty wydarzeń: 54 (-1; +3).",
+            "Usunięto akcje: Wojna o trybut, Rozbudowa (rzeźbiarstwo).",
+            "Małe zmiany w akcjach: Wojna (gwiezdna), Wzniesienie Steli i Pielgrzymka.",
+            "Przywrócono poprzednie zasady podboju.",
+            "Usunięto wymagania rozbudowy.",
+            "Zmieniono zasady punktacji za Stolice, Władców oraz Dobra Luksusowe."
         };
         static InitJsonManager()
         {   

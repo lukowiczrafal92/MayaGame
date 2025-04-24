@@ -28,13 +28,13 @@ namespace BoardGameBackend.Managers
                     foreach(var op in _gameContext.PlayerManager.Players)
                     {
                         int iRivalCapital = _gameContext.BoardManager.GetCapitalCityLevel(op.Id);
-                        if(iExpansion > iRivalCapital || (iExpansion == iRivalCapital && iCities > _gameContext.BoardManager.GetNumCities(op.Id)))
+                        if(iExpansion > iRivalCapital) // || (iExpansion == iRivalCapital && iCities > _gameContext.BoardManager.GetNumCities(op.Id)))
                             iScoreFromCapital++;
                     }
                 }
                 crow.Value1 = iExpansion;
-                crow.Value2 = iCities;
-                crow.Value3 = iScoreFromCapital;
+           //     crow.Value2 = iCities;
+                crow.Value2 = iScoreFromCapital;
                 gept.ListPlayerRows.Add(crow);
                 _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromCapital, sctype);
             }
@@ -70,13 +70,13 @@ namespace BoardGameBackend.Managers
                 var lrow = new PlayerTableRow(){Player = p.Id};
                 int iScoreFromLuxuries = 0;
                 int inumdifresource = p.PlayerLuxuries.GetNumDifferentResources();
-                if(inumdifresource >= 6)
-                    iScoreFromLuxuries += 2;
+                // if(inumdifresource >= 6)
+                //     iScoreFromLuxuries += 2;
 
                 foreach(var op in _gameContext.PlayerManager.Players)
                 {
                     if(op.PlayerLuxuries.GetNumDifferentResources() < inumdifresource)
-                        iScoreFromLuxuries += 1;
+                        iScoreFromLuxuries += 2;
                 }
 
                 lrow.Value1 = inumdifresource;
@@ -95,7 +95,7 @@ namespace BoardGameBackend.Managers
             ge.IntValue1 = _gameContext.EraEffectManager.EndCurrentEraEffect();
             _gameContext.ActionManager.AddNewGameEvent(ge);
         }
-        public void TriggerEndGameScores()
+        public void TriggerEndGameScores(bool bEstimated = false)
         {
             int NUM_PLAYERS = _gameContext.PlayerManager.Players.Count;
             foreach(var p in _gameContext.PlayerManager.Players)
@@ -119,8 +119,6 @@ namespace BoardGameBackend.Managers
 
                 iScoreFromDeity += iMin * (GameConstants.DEITY_SET_PER_PLAYERS * NUM_PLAYERS + GameConstants.DEITY_SET_POINTS);
                 
-                if(iScoreFromDeity > 0)
-                    _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromDeity, ScorePointType.EndGameDeity);
                 // angles
                 int iScoreFromAngles = 0;
                 for(int it = 0; it < 12; it ++)
@@ -136,8 +134,6 @@ namespace BoardGameBackend.Managers
                         }
                     }
                 }
-                if(iScoreFromAngles > 0)
-                    _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromAngles, ScorePointType.EndGameAngles);
 
                 // rulers
                 int iScoreFromRulers = 0;
@@ -146,7 +142,7 @@ namespace BoardGameBackend.Managers
                     foreach(var op in _gameContext.PlayerManager.Players)
                     {
                         if(op.Rulers.Count < p.Rulers.Count)
-                            iScoreFromRulers += 2;
+                            iScoreFromRulers += 3;
                     }
                 }
 
@@ -161,9 +157,18 @@ namespace BoardGameBackend.Managers
                     }
                 }
 
+                _gameContext.PlayerManager.SetEstimatedScorePoints(p, iScoreFromDeity + iScoreFromAngles + iScoreFromRulers);
+                if(!bEstimated)
+                {
+                    if(iScoreFromDeity > 0)
+                        _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromDeity, ScorePointType.EndGameDeity);
 
-                if(iScoreFromRulers > 0)
-                    _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromRulers, ScorePointType.EndGameRulers);
+                    if(iScoreFromAngles > 0)
+                        _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromAngles, ScorePointType.EndGameAngles);
+
+                    if(iScoreFromRulers > 0)
+                        _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromRulers, ScorePointType.EndGameRulers);
+                }
             }
         }
 

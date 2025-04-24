@@ -13,7 +13,7 @@ namespace BoardGameBackend.Managers
         private List<PlayerBasicSetData> playerActionsChange = new List<PlayerBasicSetData>();
         private List<GameEventSendData> gameEvents = new List<GameEventSendData>();
         private List<ActionTypes> JokerEnabledActions = new List<ActionTypes>(){
-            ActionTypes.WAR_TRIBUTE,
+        //    ActionTypes.WAR_TRIBUTE,
         //    ActionTypes.WAR_CONQUEST,
             ActionTypes.WAR_STAR,
             ActionTypes.FOUND_CITY,
@@ -23,7 +23,8 @@ namespace BoardGameBackend.Managers
             ActionTypes.CITY_EXPAND_CARVERS,
             ActionTypes.PILGRIMAGE,
             ActionTypes.CITY_EXPAND,
-            ActionTypes.MIRRORED_ANGLE
+            ActionTypes.MIRRORED_ANGLE,
+            ActionTypes.RULER_DEITY
         };
         private List<ActionTypes> CityCardNeutral = new List<ActionTypes>(){
             ActionTypes.FOUND_CITY,
@@ -35,19 +36,22 @@ namespace BoardGameBackend.Managers
             ActionTypes.ERECT_STELAE,
             ActionTypes.PILGRIMAGE,
             ActionTypes.CITY_EXPAND,
-            ActionTypes.CITY_EXPAND_CARVERS
+            ActionTypes.CITY_EXPAND_CARVERS,
+            ActionTypes.RULER_DEITY
         };
         private List<ActionTypes> CityCardEnemy = new List<ActionTypes>(){
-            ActionTypes.WAR_TRIBUTE,
+        //    ActionTypes.WAR_TRIBUTE,
         //    ActionTypes.WAR_CONQUEST,
             ActionTypes.WAR_STAR,
             ActionTypes.ERA_MERCENARIES,
+            ActionTypes.TRADE_POINTS,
             ActionTypes.PILGRIMAGE
         };
         private List<ActionTypes> ActionCardStoneCarving = new List<ActionTypes>(){
             ActionTypes.ERECT_STELAE,
             ActionTypes.RECRUIT_STONE_CARVERS,
-            ActionTypes.CITY_EXPAND_CARVERS
+            ActionTypes.CITY_EXPAND_CARVERS,
+            ActionTypes.RULER_DEITY
         };
         private List<ActionTypes> ActionCardAstronomy = new List<ActionTypes>(){
             ActionTypes.SKY_OBSERVATION,
@@ -65,7 +69,7 @@ namespace BoardGameBackend.Managers
             ActionTypes.RECRUIT_PRIESTS
         };
         private List<ActionTypes> ActionCardWar = new List<ActionTypes>(){
-            ActionTypes.WAR_TRIBUTE,
+        //    ActionTypes.WAR_TRIBUTE,
         //    ActionTypes.WAR_CONQUEST,
             ActionTypes.WAR_STAR,
             ActionTypes.RECRUIT_WARRIORS
@@ -127,6 +131,7 @@ namespace BoardGameBackend.Managers
                 return;
             }
 
+            _gameContext.ScorePointsManager.TriggerEndGameScores(true);
             if(RulerDataDirty)
             {
                 FullRulerData fff = new FullRulerData(){
@@ -370,8 +375,16 @@ namespace BoardGameBackend.Managers
 
                 if(player.HandActionCards.Count == 1 && player.IncomingOrder == -1 && af.ActionId != (int) ActionTypes.DISCARD_CARD)
                 {
-                    if(!IsCurrentEraId(17) || af.ActionId != (int) ActionTypes.WAR_TRIBUTE)
-                        return false;
+                    if(!IsCurrentEraId(17) || af.ActionId != (int) ActionTypes.WAR_STAR)
+                    {
+                        if(!IsCurrentEraId(24) || af.ActionId != (int) ActionTypes.PILGRIMAGE)
+                        {
+                            if(!IsCurrentEraId(25) || af.ActionId != (int) ActionTypes.ERECT_STELAE)
+                            {
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
             
@@ -521,12 +534,17 @@ namespace BoardGameBackend.Managers
                  //   if(tile.gameData.RulerStelae != -1)
                  //       return false;
                 }
+                else if(af.ActionId == (int) ActionTypes.RULER_DEITY)
+                {
+                    if(tile.gameData.OwnerId != player.Id)
+                        return false;
+                }
                 else if(af.ActionId == (int) ActionTypes.FOUND_CITY)
                 {
                     if(tile.gameData.OwnerId != Guid.Empty)
                         return false;
 
-                    if(actionCardId == 4 || af.Joker || bEventCard)
+                    if((actionCardId == 4 || af.Joker || bEventCard) && !IsCurrentEraId(10))
                     {
                         if(!HasAdjacentCity(tile, player.Id))
                             return false;
@@ -534,14 +552,8 @@ namespace BoardGameBackend.Managers
                 }
                 else if(af.ActionId == (int) ActionTypes.PILGRIMAGE)
                 {
-                    if(tile.gameData.OwnerId != player.Id)
-                    {
-                        if(actionCardId == 5 || af.Joker || bEventCard)
-                        {
-                            if(!HasAdjacentCity(tile, player.Id))
-                                return false;
-                        }
-                    }
+                    if(tile.gameData.OwnerId == Guid.Empty)
+                        return false;
                 }
                 else if(af.ActionId == (int) ActionTypes.PILGRIMAGE_RIVAL)
                 {
@@ -561,9 +573,6 @@ namespace BoardGameBackend.Managers
                     
                     if(tile.gameData.Level == 0 && (_gameContext.BoardManager.GetCapitalCity(player.Id) != null))
                         return false;
-
-                    if(!CanExpandCapital(player))
-                        return false;
                 }
                 else if(af.ActionId == (int) ActionTypes.CITY_EXPAND_CARVERS)
                 {
@@ -571,12 +580,6 @@ namespace BoardGameBackend.Managers
                         return false;
                     
                     if(tile.gameData.Level == 0 && (_gameContext.BoardManager.GetCapitalCity(player.Id) != null))
-                        return false;
-
-                    if(player.Rulers.Count() < 4)
-                        return false;
-
-                    if(!CanExpandCapital(player))
                         return false;
                 }
                 else if(af.ActionId == (int) ActionTypes.SKY_OBSERVATION)
@@ -617,6 +620,11 @@ namespace BoardGameBackend.Managers
                         return false;
 
                     if(player.PlayerLuxuries.GetLuxuryById(tile.dbData.LuxuryId).Amount == 0)
+                        return false;
+                }
+                else if(af.ActionId == (int) ActionTypes.TRADE_POINTS)
+                {
+                    if(tile.gameData.OwnerId == player.Id || tile.gameData.OwnerId == Guid.Empty)
                         return false;
                 }
                 else if(af.ActionId == (int) ActionTypes.WAR_CONQUEST)
@@ -723,7 +731,7 @@ namespace BoardGameBackend.Managers
                         return false;
                 }
                 else
-                    return false; // TUTAJ CHECK CONQUEST
+                    return false;
             }
             else if(af.ActionId == (int) ActionTypes.ERECT_STELAE)
             {
@@ -733,6 +741,14 @@ namespace BoardGameBackend.Managers
                         return false;
                 }
                 else if(!_gameContext.RulerCardsManager.HasPoolRulerId(af.RulerCardId))
+                    return false;
+            }
+            else if(af.ActionId == (int) ActionTypes.RULER_DEITY)
+            {
+                if(af.DeityId == -1)
+                    return false;
+
+                if(!player.HasRulerWithDeity(af.DeityId))
                     return false;
             }
             else if(af.ActionId == (int) ActionTypes.SKY_OBSERVATION)
@@ -770,6 +786,11 @@ namespace BoardGameBackend.Managers
                 if(player.PlayerResources.GetResourceById(specId).Amount < af.ExtraInfoId)
                     return false;
             }
+            else if(af.ActionId == (int) ActionTypes.LOOSE_ANGLE)
+            {
+                if(!player.PlayerAngleBoard.GetAngleById(af.ExtraInfoId).bChecked)
+                    return false;
+            }
             return true;
         }
 
@@ -787,8 +808,7 @@ namespace BoardGameBackend.Managers
             if(af.ActionId == (int) ActionTypes.DISCARD_CARD)
             {
                 _gameContext.PlayerManager.ChangeResourceAmount(player, af.Resource1Id, 1);
-                if(player.IncomingOrder == -1)
-                    _gameContext.PlayerManager.ClaimOrderForNextTurn(player);
+                _gameContext.PlayerManager.ClaimOrderForNextTurn(player);
 
                 if(IsCurrentEraId(22))
                     _gameContext.PlayerManager.ChangeResourceAmount(player, af.Resource2Id, 1);
@@ -807,6 +827,8 @@ namespace BoardGameBackend.Managers
             if(af.ActionId == (int) ActionTypes.ERECT_STELAE)
             {
                 _gameContext.RulerCardsManager.PlayerAcquiredRulerCard(player, af.RulerCardId, af.TileId);
+                if(IsCurrentEraId(25))
+                    _gameContext.PlayerManager.ClaimOrderForNextTurn(player);
             }
             else if(af.ActionId == (int) ActionTypes.FOUND_CITY)
             {
@@ -825,6 +847,12 @@ namespace BoardGameBackend.Managers
                 if(IsCurrentEraId(18) && player.PlayerDeities.GetDeityById(af.DeityId).Level == 0)
                     _gameContext.PlayerManager.IncreaseDeityLevel(player, af.DeityId);
 
+                _gameContext.PlayerManager.IncreaseDeityLevel(player, af.DeityId);
+                if(IsCurrentEraId(24))
+                    _gameContext.PlayerManager.ClaimOrderForNextTurn(player);
+            }
+            else if(af.ActionId == (int) ActionTypes.RULER_DEITY)
+            {
                 _gameContext.PlayerManager.IncreaseDeityLevel(player, af.DeityId);
             }
             else if(af.ActionId == (int) ActionTypes.SWAP_DEITIES_LEVELS)
@@ -887,8 +915,6 @@ namespace BoardGameBackend.Managers
                     _gameContext.PlayerManager.ChangeResourceAmount(player, tile.dbData.Resource2, 2);
                 }
             //    _gameContext.PlayerManager.ChangeWarfareScore(player, GetWarfareScoreFromTribute());
-                if(IsCurrentEraId(17) && player.IncomingOrder == -1)
-                    _gameContext.PlayerManager.ClaimOrderForNextTurn(player);
             }
             else if(af.ActionId == (int) ActionTypes.WAR_CONQUEST)
             {
@@ -901,6 +927,10 @@ namespace BoardGameBackend.Managers
                 
                 _gameContext.BoardManager.CityFoundOrConquest(player, af.TileId);
                 _gameContext.PlayerManager.ChangeWarfareScore(player, GetWarfareScoreFromConquest());
+            }
+            else if(af.ActionId == (int) ActionTypes.LOOSE_ANGLE)
+            {
+                _gameContext.PlayerManager.MakePlayerLooseAngle(player, af.ExtraInfoId);
             }
             else if(af.ActionId == (int) ActionTypes.WAR_STAR)
             {
@@ -930,6 +960,9 @@ namespace BoardGameBackend.Managers
                 
                     _gameContext.BoardManager.CityFoundOrConquest(player, af.TileId);
                 }
+
+                if(IsCurrentEraId(17))
+                    _gameContext.PlayerManager.ClaimOrderForNextTurn(player);
             }
             else if(af.ActionId == (int) ActionTypes.LOOSE_CITY)
             {
@@ -949,6 +982,13 @@ namespace BoardGameBackend.Managers
                 var tile = _gameContext.BoardManager.GetTileById(af.TileId);
                 _gameContext.PlayerManager.ChangeResourceAmount(player, tile.dbData.Resource1, 2);
                 _gameContext.PlayerManager.ChangeResourceAmount(player, tile.dbData.Resource2, 2);
+            }
+            else if(af.ActionId == (int) ActionTypes.TRADE_POINTS)
+            {
+                int tileResource = _gameContext.BoardManager.GetTileById(af.TileId).dbData.LuxuryId;
+                int iPoints = player.PlayerLuxuries.Luxuries.Where(l => l.Amount > 0 && l.Id != tileResource).Count();
+                if(iPoints > 0)
+                    _gameContext.PlayerManager.ChangeScorePoints(player, iPoints, ScorePointType.ErasAndEvents);
             }
             
             ConvertFormIntoActionLog(player, af);
@@ -1120,24 +1160,10 @@ namespace BoardGameBackend.Managers
                 }
             }            
 
-            if(numcities >= 5)
+            if(numcities >= 6)
                 return true;
 
-            return _gameContext.BoardManager.GetNumCities(attackingplayer) <= numcities;
-        }
-
-        public bool CanExpandCapital(PlayerInGame player)
-        {
-            var capitaltile = _gameContext.BoardManager.GetCapitalCity(player.Id);
-            int icapitallevel = 0;
-
-            if(capitaltile != null)
-                icapitallevel = capitaltile.gameData.Level;
-
-            if((icapitallevel < _gameContext.BoardManager.GetNumCities(player.Id)) || !_gameContext.BoardManager.IsThereAtLeastOneNeutralCityLocation())
-                return true;
-
-            return false;
+            return _gameContext.BoardManager.GetNumCities(attackingplayer) < numcities;
         }
     }
 }

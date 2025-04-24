@@ -36,20 +36,23 @@ namespace BoardGameBackend.Managers
         }
 
         
-        public void OnAgeStart()
+        public void OnAgeStart(bool bForceNewPool)
         {
             _gameContext.ActionManager.RulerDataDirty = true;
             _availablepool.Clear();
-            int iPoolBasedOnPlayers = cPerPlayers[_gameContext.PlayerManager.Players.Count - 1];
-            for(int i = 0; i < iPoolBasedOnPlayers; i++)
+            if(bForceNewPool || !_gameContext.ActionManager.IsCurrentEraId(27))
             {
-                if(_deck.Count() > 0)
+                int iPoolBasedOnPlayers = cPerPlayers[_gameContext.PlayerManager.Players.Count - 1];
+                for(int i = 0; i < iPoolBasedOnPlayers; i++)
                 {
-                    _availablepool.Add(_deck[_deck.Count() -1]);
-                    _deck.RemoveAt(_deck.Count() -1);
+                    if(_deck.Count() > 0)
+                    {
+                        _availablepool.Add(_deck[_deck.Count() -1]);
+                        _deck.RemoveAt(_deck.Count() -1);
+                    }
+                    else
+                        break;
                 }
-                else
-                    break;
             }
         }
 
@@ -97,7 +100,8 @@ namespace BoardGameBackend.Managers
                _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.RulerCard, Player = player.Id, Value1 = newruler.dbInfo.Id, Value2 = 1});
             // No more since version 3.
             //   _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.StelaeToken, Player = player.Id, Value1 = tileid, Value2 = newruler.dbInfo.Id});
-               _gameContext.BoardManager.GetTileById(tileid).gameData.RulerStelae = newruler.dbInfo.Id;
+            //   _gameContext.BoardManager.GetTileById(tileid).gameData.RulerStelae = newruler.dbInfo.Id;
+
                 // effects and other rewards:
                 // Converters for now
                 if(newruler.dbInfo.ConverterId != -1)
