@@ -18,4 +18,5 @@
 {"Id" : 18, "FromResource" : 1, "ToResource" : 2, "FromValue" : 2, "ToValue" : 1, "Initial" : false},
 {"Id" : 19, "FromResource" : 3, "ToResource" : 2, "FromValue" : 2, "ToValue" : 1, "Initial" : false},
 {"Id" : 20, "FromResource" : 3, "ToResource" : 1, "FromValue" : 2, "ToValue" : 1, "Initial" : false},
-{"Id" : 21, "FromResource" : 3, "ToResource" : 5, "FromValue" : 2, "ToValue" : 1, "Initial" : false}]
+{"Id" : 21, "FromResource" : 3, "ToResource" : 5, "FromValue" : 2, "ToValue" : 1, "Initial" : false},
+{"Id" : 22, "FromResource" : 2, "ToResource" : 4, "FromValue" : 2, "ToValue" : 1, "Initial" : false}]

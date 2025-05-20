@@ -203,17 +203,27 @@ namespace BoardGameBackend.Managers
         {
             var d1 = p.PlayerDeities.GetDeityById(iDeityOne);
             var d2 = p.PlayerDeities.GetDeityById(iDeityTwo);
+            bool bCheckResources = false;
+            foreach(var l in p.PlayerLuxuries.Luxuries)
+            {
+                if(!l.HasLuxury)
+                    bCheckResources = true;
+            }
             int iLevel1 = d1.Level;
             int iLevel2 = d2.Level;
             if(iLevel1 == 3)
             {
-                ChangeLuxuryAmount(p, d1.Luxury, -1);
-                ChangeLuxuryAmount(p, d2.Luxury, 1);
+                SetHasLuxuryAlways(p, d1.Luxury, -1);
+                SetHasLuxuryAlways(p, d2.Luxury, 1);
+                if(bCheckResources)
+                    CheckIfHasLuxuryComplete(p);
             }
             if(iLevel2 == 3)
             {
-                ChangeLuxuryAmount(p, d1.Luxury, 1);
-                ChangeLuxuryAmount(p, d2.Luxury, -1);
+                SetHasLuxuryAlways(p, d1.Luxury, 1);
+                SetHasLuxuryAlways(p, d2.Luxury, -1);
+                if(bCheckResources)
+                    CheckIfHasLuxuryComplete(p);
             }
             d1.Level = iLevel2;
             d2.Level = iLevel1;
@@ -234,10 +244,51 @@ namespace BoardGameBackend.Managers
                 if(deity.Level == 1)
                     ChangeResourceAmount(p, deity.Resource, 1);
                 else if(deity.Level == 3)
-                    ChangeLuxuryAmount(p, deity.Luxury, 1);
+                    SetHasLuxuryAlways(p, deity.Luxury, 1);
                     
                 _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.DeityLevel, Value1 = iDeityID, Value2 = p.PlayerDeities.GetDeityById(iDeityID).Level});
             }         
+        }
+
+        public void SetHasLuxury(PlayerInGame p, int iLuxuryId)
+        {
+            if(!p.PlayerLuxuries.GetLuxuryById(iLuxuryId).HasLuxury)
+            {
+                p.PlayerLuxuries.GetLuxuryById(iLuxuryId).HasLuxury = true;
+                _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.HasLuxury, Value1 = iLuxuryId});
+            }
+        }
+
+        public void SetHasLuxuryAlways(PlayerInGame p, int iLuxuryId, int iChange)
+        {
+            bool bHasNow = p.PlayerLuxuries.GetLuxuryById(iLuxuryId).AlwaysHasLuxury > 0;
+            p.PlayerLuxuries.GetLuxuryById(iLuxuryId).AlwaysHasLuxury += iChange;
+            if(bHasNow != (p.PlayerLuxuries.GetLuxuryById(iLuxuryId).AlwaysHasLuxury > 0))
+            {
+                _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.LuxuryPermanent, Value1 = iLuxuryId, Value2 = p.PlayerLuxuries.GetLuxuryById(iLuxuryId).AlwaysHasLuxury});
+                if(!bHasNow)
+                    SetHasLuxury(p, iLuxuryId);
+            }
+        }
+
+        public void CheckIfHasLuxuryComplete(PlayerInGame p)
+        {
+            foreach(var l in p.PlayerLuxuries.Luxuries)
+            {
+                if(!l.HasLuxury)
+                    return;
+            }
+            
+            foreach(var l in p.PlayerLuxuries.Luxuries)
+            {
+                if(l.AlwaysHasLuxury <= 0)
+                    l.HasLuxury = false;
+            }
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.ClearLuxury, Value1 = 1});
+            ChangeScorePoints(p, _gameContext.iLuxuryBonus, ScorePointType.Luxuries);
+            _gameContext.DoReduceLuxuryBonus();
+            if(_gameContext.EraEffectManager.GetCurrentAgeEffectId() == 31)
+                _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ChooseSpecialist, ActivePlayers = new List<Guid>(){p.Id}});
         }
 
         public void ChangeLuxuryAmount(PlayerInGame p, int iLuxuryId, int iAmount)
@@ -332,6 +383,9 @@ namespace BoardGameBackend.Managers
                 if(iRealIncome != 0)
                     ChangeResourceAmount(p, resource.Id, iRealIncome);
             }
+
+            if(_gameContext.BoardManager.GetCapitalCity(p.Id) != null)
+                ChangeScorePoints(p, 2, ScorePointType.DuringGameCapitalCity);
         }
 
         public void ApplyResourceConverter(PlayerInGame p, ResourceConverterGameData data)

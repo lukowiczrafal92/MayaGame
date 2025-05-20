@@ -27,6 +27,7 @@ namespace BoardGameBackend.Models
         public List<int> AuraEffects = new List<int>();
         public List<ActionCard> ReserveActionCards = new List<ActionCard>();
         public List<RulerCard> Rulers = new List<RulerCard>();
+        public int Stolica = -1;
         public PlayerInGame(Player player)
         {
             Id = player.Id;

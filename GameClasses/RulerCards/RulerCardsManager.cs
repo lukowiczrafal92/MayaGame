@@ -108,7 +108,7 @@ namespace BoardGameBackend.Managers
                     _gameContext.PlayerManager.AddResourceConverter(player, newruler.dbInfo.ConverterId);
 
                 if(newruler.dbInfo.LuxuryId != -1)
-                    _gameContext.PlayerManager.ChangeLuxuryAmount(player, newruler.dbInfo.LuxuryId, 1);
+                    _gameContext.PlayerManager.SetHasLuxuryAlways(player, newruler.dbInfo.LuxuryId, 1);
 
                 if(newruler.dbInfo.DeityId != -1)
                     player.PlayerDeities.GetDeityById(newruler.dbInfo.DeityId).TieBreaker++;

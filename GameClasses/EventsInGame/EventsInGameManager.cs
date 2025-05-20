@@ -39,14 +39,43 @@ namespace BoardGameBackend.Managers
             if(!gameContext.GameOptions.AgeCards)
                 return;
 
+            bool bSplitIntoQuest = gameContext.GameOptions.EventsIntoQuests;
             var deck = new List<EventGameData>();
+            var deckQuest = new List<EventGameData>();
             foreach(var dbinfo in GameDataManager.GetEvents())
             {
                 if(dbinfo.Enabled)
-                    deck.Add(dbinfo);
+                {
+                    if(bSplitIntoQuest && dbinfo.Quest)
+                        deckQuest.Add(dbinfo);
+                    else
+                        deck.Add(dbinfo);
+                }
             }
             Random rng = new Random();
             deck = deck.OrderBy(m => rng.Next()).ToList();
+            if(bSplitIntoQuest)
+            {
+                deckQuest = deckQuest.OrderBy(m => rng.Next()).ToList();
+                var questcard = deckQuest.Last();
+                deckQuest.Remove(questcard);
+                EventsEraOneRound1.Add(questcard.Id);
+                questcard = deckQuest.Last();
+                deckQuest.Remove(questcard);
+                EventsEraOneRound2.Add(questcard.Id);
+                questcard = deckQuest.Last();
+                deckQuest.Remove(questcard);
+                EventsEraTwoRound1.Add(questcard.Id);
+                questcard = deckQuest.Last();
+                deckQuest.Remove(questcard);
+                EventsEraTwoRound2.Add(questcard.Id);
+                questcard = deckQuest.Last();
+                deckQuest.Remove(questcard);
+                EventsEraThreeRound1.Add(questcard.Id);
+                questcard = deckQuest.Last();
+                deckQuest.Remove(questcard);
+                EventsEraThreeRound2.Add(questcard.Id);
+            }
 
             if(_gameContext.EraEffectManager.AgeOneCard != 8)
             {

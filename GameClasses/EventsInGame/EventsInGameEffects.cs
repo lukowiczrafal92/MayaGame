@@ -64,7 +64,7 @@ namespace BoardGameBackend.Managers
                 case 39:
                     ScoreForCityStack(ge);
                     break;
-                case 40: case 41: case 42: case 43: case 44: case 45: case 47: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 58:
+                case 40: case 41: case 42: case 43: case 44: case 45: case 47: case 50: case 51: case 52: case 53: case 54: case 55: case 56: case 58: case 62:
                     DoQueueExtraPhaseAction(ge);
                     break;
                 case 46:
@@ -78,6 +78,15 @@ namespace BoardGameBackend.Managers
                     break;
                 case 57:
                     AddPointIfZero(ge);
+                    break;
+                case 59:
+                    ClearLuxuryResources(ge);
+                    break;
+                case 60:
+                    DoScoreFromEmpire(ge);
+                    break;
+                case 61:
+                    DoQueueChooseSpecialistPhase(ge);
                     break;
                 default:
                     Console.WriteLine("Missing event handler for " + iKey.ToString());
@@ -130,7 +139,10 @@ namespace BoardGameBackend.Managers
             foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
             {
                 var lrow = new PlayerTableRow(){Player = p.Id};
-                int iScore = p.PlayerLuxuries.GetLuxuryById(luxuryId).Amount;
+                int iScore = 0;
+                if(_gameContext.BoardManager.HasCityWithLuxury(p.Id, luxuryId))
+                    iScore = 2;
+
                 lrow.Value1 = iScore;
                 ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
                 _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
@@ -213,6 +225,27 @@ namespace BoardGameBackend.Managers
                 player.VisionAngle = (player.VisionAngle + rotateval + 6) % 6;
             }
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = Guid.Empty, DataType = PlayerBasicSetDataType.BoardRotation, Value1 = rotateval});
+        }
+
+        public void DoScoreFromEmpire(GameEventSendData ge)
+        {
+            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.SimpleScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                int iScore = 0;
+                int iNumCities = _gameContext.BoardManager.GetNumCities(p.Id);
+                if(iNumCities >= 7)
+                    iScore = 3;
+                else if(iNumCities >= 5)
+                    iScore = 2;
+                else if(iNumCities >= 3)
+                    iScore = 1;
+
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                lrow.Value1 = iScore;
+                ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
+            }       
         }
 
         public void AddPointIfZero(GameEventSendData ge)
@@ -331,6 +364,25 @@ namespace BoardGameBackend.Managers
                 ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
                 _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
             }          
+        }
+
+        public void ClearLuxuryResources(GameEventSendData ge)
+        {
+            foreach(var p in _gameContext.PlayerManager.Players)
+            {
+                foreach(var l in p.PlayerLuxuries.Luxuries)
+                {
+                    if(l.AlwaysHasLuxury <= 0)
+                        l.HasLuxury = false;
+                }
+                _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.ClearLuxury});
+            }
+        }
+
+        public void DoQueueChooseSpecialistPhase(GameEventSendData ge)
+        {
+            foreach(var player in _gameContext.PlayerManager.GetPlayersInReverseOrder())
+                _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ChooseSpecialist, ActivePlayers = new List<Guid>(){player.Id}});
         }
 
         public void DoQueueExtraPhaseAction(GameEventSendData ge)

@@ -3,6 +3,7 @@ namespace BoardGameBackend.Models
     public class StartGameModel
     {
         public bool AgeCards {get; set;} = true;
+        public bool EventsIntoQuests {get; set;} = true;
         public bool ThreeStar {get; set;} = true;
         public bool AllowRotateConstellations {get; set;} = true;
         public bool SpecialActions {get; set;} = false;

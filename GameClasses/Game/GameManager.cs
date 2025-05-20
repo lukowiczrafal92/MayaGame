@@ -86,13 +86,15 @@ namespace BoardGameBackend.Managers
                 TilesData = gameContext.BoardManager.GetFullTilesData(),
                 PlayerSetData = nSetData,
                 FullRulerData = gameContext.RulerCardsManager.GetFullRulerBackup(),
+                FullStolicaData = gameContext.StolicaCardsManager.GetFullStolicaBackup(),
                 PhaseData = gameContext.PhaseManager.GetPhaseData(),
                 Konstelacje = gameContext.KonstelacjeManager.GetFullData(),
                 EraEffects = gameContext.EraEffectManager.GetFullData(),
                 EventsLists = gameContext.EventsInGameManager.GetFullData(),
                 PhaseQueue = gameContext.PhaseManager.PhaseQueue,
                 ActionDeck = gameContext.ActionCardManager.GetActionCards(),
-                PlayerActionCards = gameContext.PlayerManager.GetBackupActionCards()
+                PlayerActionCards = gameContext.PlayerManager.GetBackupActionCards(),
+                LuxuryBonus = gameContext.iLuxuryBonus
             };
             return FullGameBackup;
         }
@@ -115,12 +117,14 @@ namespace BoardGameBackend.Managers
                 TilesData = gameContext.BoardManager.GetFullTilesData(),
                 PlayerSetData = nSetData,
                 FullRulerData = FullRulerData,
+                FullStoliceData = gameContext.StolicaCardsManager.GetFullStolicaBackup(),
                 PhaseData = gameContext.PhaseManager.GetPhaseData(),
                 PlayerActionCards = gameContext.ActionCardManager.GetPlayerActioncCardsData(gameContext.PlayerManager.GetPlayerById(playerId)),
                 Konstelacje = gameContext.KonstelacjeManager.GetFullData(),
                 startGameModel = gameContext.GameOptions,
                 EraEffects = gameContext.EraEffectManager.GetFullData(),
-                EventsLists = gameContext.EventsInGameManager.GetFullData()
+                EventsLists = gameContext.EventsInGameManager.GetFullData(),
+                LuxuryBonus = gameContext.iLuxuryBonus
             };
 
             return fullGameData;
@@ -152,6 +156,12 @@ namespace BoardGameBackend.Managers
                 {
                     if(luxuryData.Amount > 0)
                         nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.Luxury, Value1 = luxuryData.Id, Value2 = luxuryData.Amount}); 
+
+                    if(luxuryData.HasLuxury)
+                        nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.HasLuxury, Value1 = luxuryData.Id}); 
+
+                    if(luxuryData.AlwaysHasLuxury > 0)
+                        nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.LuxuryPermanent, Value1 = luxuryData.Id, Value2 = luxuryData.AlwaysHasLuxury}); 
                 }
 
                 foreach(var deity in p.PlayerDeities.Deities)
@@ -162,6 +172,9 @@ namespace BoardGameBackend.Managers
 
                 foreach(var ruler in p.Rulers)
                     nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.RulerCard, Value1 = ruler.dbInfo.Id});
+
+                if(p.Stolica != -1)
+                    nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.CapitalCard, Value1 = p.Stolica});
 
                 foreach(var effectid in p.AuraEffects)
                     nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.AuraEffect, Value1 = effectid});

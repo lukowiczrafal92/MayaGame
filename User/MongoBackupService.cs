@@ -59,9 +59,16 @@ namespace BoardGameBackend.Repositories
             var update = updateBuilder.Set(p => p.FullGameBackup, fGameBackup);
             await backupCollection.UpdateOneAsync(filter, update);
         }
+        public async void DeleteAll()
+        {
+            var filter =  filterBuilder.Where(mayabbackup => mayabbackup.GameVersion > 0);
+        //    var filter =  filterBuilder.Where(mayabbackup => true);
+            await backupCollection.DeleteManyAsync(filter);  
+        }
 
         public async Task<List<FullMayabBackup>?> GetAllBackupData()
         {
+        //    DeleteAll();
             var filter =  filterBuilder.Eq(mayabbackup => mayabbackup.GameVersion, GameConstants.m_iGameVersion);
             var dane = await (await backupCollection.FindAsync(filter)).ToListAsync();
          //   var dane = await (await backupCollection.FindAsync(_ => true)).ToListAsync();

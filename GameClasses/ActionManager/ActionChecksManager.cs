@@ -67,14 +67,26 @@ namespace BoardGameBackend.Managers
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.LOOSE_CITY)
             {
                 int iNumCities = _gameContext.BoardManager.GetNumCities(player.Id);
+                if(_gameContext.BoardManager.GetCapitalCity(player.Id) != null)
+                    iNumCities--;
+
                 if(iNumCities == 1)
                 {
                     player.LogAction(ActionTypes.LOOSE_CITY);
-                    _gameContext.BoardManager.CityLost(player, _gameContext.BoardManager.GetFirstPlayerCity(player.Id));
+                    _gameContext.BoardManager.CityLost(player, _gameContext.BoardManager.GetFirstPlayerCity(player.Id, true));
                     return false;
                 }
                 else
                     return iNumCities > 0;
+            }
+            else if(dbEventInfo.EffectVal1 == (int) ActionTypes.CHECK_ANY_LUXURY)
+            {
+                if(player.PlayerLuxuries.Luxuries.Where(a => !a.HasLuxury).Count() > 0)
+                    return true;
+
+                player.LogAction(ActionTypes.CHECK_ANY_LUXURY);
+                _gameContext.PlayerManager.CheckIfHasLuxuryComplete(player);
+                return false;
             }
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.SPECIALISTS_INTO_POINTS)
                 return true;
@@ -204,11 +216,11 @@ namespace BoardGameBackend.Managers
                     return true;
             }
 
-            if(_gameContext.ActionManager.CanConquerEnemyCity(targetplayer.Id, player.Id))
+        /*    if(_gameContext.ActionManager.CanConquerEnemyCity(targetplayer.Id, player.Id))
             {
                 if(tile.gameData.Level == 0)
                     return true;
-            }
+            } */
             return false;
         }
     }

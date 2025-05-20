@@ -18,6 +18,7 @@ namespace BoardGameBackend.Models
         public required List<FullPlayerData> PlayersData { get; set; }
         public required List<TileGame> TilesData {get; set; }
         public required FullRulerBackup FullRulerData {get; set;}
+        public required List<int> FullStolicaData {get; set;}
         public required List<PlayerBasicSetData> PlayerSetData {get; set; }
         public required PhaseData PhaseData {get; set;}
         public required List<KonstelacjaSendInfo> Konstelacje {get; set;}
@@ -26,6 +27,7 @@ namespace BoardGameBackend.Models
         public required List<Phase> PhaseQueue {get; set;}
         public required List<ActionCard> ActionDeck {get; set;}
         public required List<PlayerBackupActionCards> PlayerActionCards {get; set;}
+        public required int LuxuryBonus {get; set;}
     }
     public class FullGameData
     {
@@ -33,6 +35,7 @@ namespace BoardGameBackend.Models
         public required List<FullPlayerData> PlayersData { get; set; }
         public required List<TileGame> TilesData {get; set; }
         public required FullRulerData FullRulerData {get; set;}
+        public required List<int> FullStoliceData {get; set;}
         public required List<PlayerBasicSetData> PlayerSetData {get; set; }
         public required PhaseData PhaseData {get; set;}
         public required ActionCardsPlayerData PlayerActionCards {get; set;}
@@ -40,6 +43,7 @@ namespace BoardGameBackend.Models
         public required StartGameModel startGameModel {get; set;}
         public required List<int> EraEffects {get; set;}
         public required List<List<int>> EventsLists {get; set;}
+        public required int LuxuryBonus {get; set;}
     }
 
     public class FullRulerBackup

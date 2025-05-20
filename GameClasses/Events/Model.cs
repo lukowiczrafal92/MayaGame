@@ -83,10 +83,12 @@ namespace BoardGameBackend.Models
         public required FullRulerData FullRulerData {get; set; }
         public required List<PlayerBasicSetData> PlayerDataChanges { get; set; }
         public required PhaseData PhaseData {get; set;}
+        public required List<int> StoliceFullData {get; set;}
         public required List<KonstelacjaSendInfo> Konstelacje {get; set;}
         public required StartGameModel startGameModel {get; set;}
         public required List<int> EraEffects {get; set;}
         public required List<List<int>> EventsLists {get; set;}
+        public required int LuxuryBonus {get; set;}
     }
 
     public class EndOfPlayerTurn

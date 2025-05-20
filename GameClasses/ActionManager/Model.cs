@@ -26,7 +26,12 @@ namespace BoardGameBackend.Models
         CityLevel,
         CityDestroyed,
         AngleLost,
-        EstScoreEnd
+        EstScoreEnd,
+        LuxuryPermanent,
+        HasLuxury,
+        ClearLuxury,
+        GameLuxuryBonus,
+        CapitalCard
     }
 
     public enum PlayerTableType

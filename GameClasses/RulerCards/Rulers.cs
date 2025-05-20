@@ -16,5 +16,6 @@ namespace BoardGameBackend.Models
         public int AbilityInfo;
         public int AuraEffectId;
         public int Angle;
+        public bool ComboScore;
     }
 }

@@ -41,6 +41,7 @@ namespace BoardGameBackend.Models
         public int ExtraInfoTypeId {get; set;} = -1;
         public int ExtraInfoId {get; set;} = -1;
         public int EventCardId {get; set;} = -1;
+        public int CapitalCardId {get; set;} = -1;
         public bool PassOnAction {get; set;} = false;
     }
     public enum ActionTypes{
@@ -75,6 +76,7 @@ namespace BoardGameBackend.Models
         SPECIALISTS_INTO_POINTS,
         LOOSE_ANGLE,
         RULER_DEITY,
-        TRADE_POINTS
+        TRADE_POINTS,
+        CHECK_ANY_LUXURY
     }
 }

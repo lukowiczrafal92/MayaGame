@@ -22,6 +22,7 @@ namespace BoardGameBackend.GameData
         private static List<LuxuryGameData> lLuxuries = new List<LuxuryGameData>();
         private static List<EraEffectGameData> lEraEffects = new List<EraEffectGameData>();
         private static List<EventGameData> lEvents = new List<EventGameData>();
+        private static List<StolicaData> lStolice = new List<StolicaData>();
 
         static GameDataManager()
         {            
@@ -46,6 +47,9 @@ namespace BoardGameBackend.GameData
             fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data/Rulers.json");
             jsonData = File.ReadAllText(fullPath);
             lRulers = JsonConvert.DeserializeObject<List<RulerGameData>>(jsonData);     
+            fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data/Stolice.json");
+            jsonData = File.ReadAllText(fullPath);
+            lStolice = JsonConvert.DeserializeObject<List<StolicaData>>(jsonData);     
             fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data/ActionCards.json");
             jsonData = File.ReadAllText(fullPath);
             lActionCards = JsonConvert.DeserializeObject<List<ActionCardGameData>>(jsonData);
@@ -93,6 +97,13 @@ namespace BoardGameBackend.GameData
         }
         public static List<KonstelacjaGameData> GetKonstelacje(){
             return lKonstelacje;
+        }
+        public static StolicaData GetStolicaById(int id){
+            return lStolice.FirstOrDefault(action => action.Id == id)!;
+        }
+        public static List<StolicaData> GetStolice()
+        {
+            return lStolice;
         }
         public static List<EraEffectGameData> GetEraEffects(){
             return lEraEffects;

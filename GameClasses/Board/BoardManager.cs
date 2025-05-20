@@ -137,7 +137,7 @@ namespace BoardGameBackend.Managers
             tile.gameData.Level = 0;
             _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource1, -1);
             _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource2, -1);
-            _gameContext.PlayerManager.ChangeLuxuryAmount(player, tile.dbData.LuxuryId, -1);
+        //    _gameContext.PlayerManager.ChangeLuxuryAmount(player, tile.dbData.LuxuryId, -1);
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = player.Id, DataType = PlayerBasicSetDataType.CityDestroyed, Value1 = tile.dbData.Id});
         }
 
@@ -148,14 +148,22 @@ namespace BoardGameBackend.Managers
                 var oldplayer = _gameContext.PlayerManager.GetPlayerById(tile.gameData.OwnerId);
                 _gameContext.PlayerManager.ChangeResourceIncome(oldplayer, tile.dbData.Resource1, -1);
                 _gameContext.PlayerManager.ChangeResourceIncome(oldplayer, tile.dbData.Resource2, -1);
-                _gameContext.PlayerManager.ChangeLuxuryAmount(oldplayer, tile.dbData.LuxuryId, -1);
+            //    _gameContext.PlayerManager.ChangeLuxuryAmount(oldplayer, tile.dbData.LuxuryId, -1);
             }
             tile.gameData.OwnerId = player.Id;
             tile.gameData.Level = 0;
             _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource1, 1);
             _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource2, 1);
-            _gameContext.PlayerManager.ChangeLuxuryAmount(player, tile.dbData.LuxuryId, 1);
+        //    _gameContext.PlayerManager.ChangeLuxuryAmount(player, tile.dbData.LuxuryId, 1);
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = player.Id, DataType = PlayerBasicSetDataType.CityClaim, Value1 = tile.dbData.Id});
+
+            if(GetCapitalCity(player.Id) == null)
+            {
+                if(GetNumCities(player.Id) == 3) // change to 6
+                {
+                    _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ChooseCapital, ActivePlayers = new List<Guid>(){player.Id}});
+                }
+            }
         }
 
         public void CityExpands(PlayerInGame player, int tileid)
@@ -180,11 +188,14 @@ namespace BoardGameBackend.Managers
 
         public void CapitalStatusChanged(PlayerInGame player, Tile tile, int iAdd, bool bAdd)
         {
-            if(_gameContext.EraEffectManager.CurrentAgeCardId == 9)
+            if(_gameContext.EraEffectManager.CurrentAgeCardId != 9)
             {
-                _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource1, iAdd);
-                _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource2, iAdd);
+                _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource1, -1 * iAdd);
+                _gameContext.PlayerManager.ChangeResourceIncome(player, tile.dbData.Resource2, -1 *  iAdd);
             }
+        
+        //   nie ma sensu na razie
+        //    _gameContext.PlayerManager.SetHasLuxuryAlways(player, tile.dbData.LuxuryId, iAdd);
         }
 
         public void CityFoundOrConquest(PlayerInGame player, int tileid)
@@ -211,12 +222,15 @@ namespace BoardGameBackend.Managers
             return tile.gameData.Level;
         }
 
-        public int GetFirstPlayerCity(Guid playerId)
+        public int GetFirstPlayerCity(Guid playerId, bool bIgnoreCapital = false)
         {
             foreach(var tile in Tiles)
             {
                 if(tile.gameData.OwnerId == playerId)
-                    return tile.dbData.Id;
+                {
+                    if(!bIgnoreCapital || tile.gameData.Level < 1)
+                        return tile.dbData.Id;
+                }
             }
             return -1;
         }
@@ -229,6 +243,19 @@ namespace BoardGameBackend.Managers
                     cc++;
             }
             return cc;
+        }
+
+        public bool HasCityWithLuxury(Guid playerId, int iLuxuryId)
+        {
+            foreach(var tile in Tiles)
+            {
+                if(tile.gameData.OwnerId == playerId)
+                {
+                    if(tile.dbData.LuxuryId == iLuxuryId)
+                        return true;
+                }
+            }
+            return false;
         }
 
         public int GetCityStackAmount(Guid playerId)

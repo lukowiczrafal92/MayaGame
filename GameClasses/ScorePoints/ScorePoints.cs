@@ -90,8 +90,8 @@ namespace BoardGameBackend.Managers
         {
             GameEventSendData ge = new GameEventSendData(){gameEventSendType = GameEventSendType.EraEnd};
         //    ge.gameEventPlayerTable = EndEraWarfarePoints(ScorePointType.EraWarfare);
-            ge.gameEventPlayerTableTwo = EndEraLuxuryPoints(ScorePointType.Luxuries);
-            ge.gameEventPlayerTableThird = EndEraCapitalPoints(ScorePointType.DuringGameCapitalCity);
+        //    ge.gameEventPlayerTableTwo = EndEraLuxuryPoints(ScorePointType.Luxuries);
+        //    ge.gameEventPlayerTableThird = EndEraCapitalPoints(ScorePointType.DuringGameCapitalCity);
             ge.IntValue1 = _gameContext.EraEffectManager.EndCurrentEraEffect();
             _gameContext.ActionManager.AddNewGameEvent(ge);
         }
@@ -144,6 +144,17 @@ namespace BoardGameBackend.Managers
                         if(op.Rulers.Count < p.Rulers.Count)
                             iScoreFromRulers += 3;
                     }
+
+                    int iComboScoreCount = p.Rulers.Where(r => r.dbInfo.ComboScore).Count();
+                    if(iComboScoreCount > 0)
+                    {
+                        if(iComboScoreCount > 2)
+                            iScoreFromRulers += 9;
+                        else if(iComboScoreCount == 2)
+                            iScoreFromRulers += 4;
+                        else
+                            iScoreFromRulers += 1;
+                    }
                 }
 
                 // end resource score also from rulers
@@ -157,7 +168,18 @@ namespace BoardGameBackend.Managers
                     }
                 }
 
-                _gameContext.PlayerManager.SetEstimatedScorePoints(p, iScoreFromDeity + iScoreFromAngles + iScoreFromRulers);
+                int iScoreFromCapital = 0;
+                int iCapitalLevel = _gameContext.BoardManager.GetCapitalCityLevel(p.Id);
+                if(iCapitalLevel > 0)
+                {
+                    foreach(var op in _gameContext.PlayerManager.Players)
+                    {
+                        if(_gameContext.BoardManager.GetCapitalCityLevel(op.Id) < iCapitalLevel)
+                            iScoreFromCapital += 2;
+                    }
+                }
+
+                _gameContext.PlayerManager.SetEstimatedScorePoints(p, iScoreFromDeity + iScoreFromAngles + iScoreFromRulers + iScoreFromCapital);
                 if(!bEstimated)
                 {
                     if(iScoreFromDeity > 0)
@@ -168,6 +190,9 @@ namespace BoardGameBackend.Managers
 
                     if(iScoreFromRulers > 0)
                         _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromRulers, ScorePointType.EndGameRulers);
+
+                    if(iScoreFromCapital > 0)
+                        _gameContext.PlayerManager.ChangeScorePoints(p, iScoreFromRulers, ScorePointType.DuringGameCapitalCity);
                 }
             }
         }

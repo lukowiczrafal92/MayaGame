@@ -71,6 +71,30 @@ namespace BoardGameBackend.Controllers
             }
         }
 
+        [HttpPost("CapitalChoice/{id}")]
+        [Authorize]
+        [PhaseCheckFilter(PhaseType.ChooseCapital)]
+        public ActionResult CapitalChoice(string id, [FromBody] ActionFormSend data)
+        {
+            try
+            {
+                UserModel user = (UserModel)Request.HttpContext.Items["User"]!;
+                var gameContext = (GameContext)Request.HttpContext.Items["GameContext"]!;
+                var player = (PlayerInGame)Request.HttpContext.Items["Player"]!;
+           
+                var actionValid = gameContext.ActionManager.ReceivedCapitalChoice(data, player);
+                if(actionValid == false){
+                    return BadRequest(new { Error = "Unable to make action." });
+                }
+
+                return Ok(new { Message = "Action completed successfully." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(new { Error = "Unexpected error" });
+            }
+        }
         
         [HttpPost("ConvertPlayerAction/{id}")]
         [Authorize]
@@ -109,6 +133,32 @@ namespace BoardGameBackend.Controllers
                 var player = (PlayerInGame)Request.HttpContext.Items["Player"]!;
            
                 var actionValid = gameContext.ActionManager.ConvertResourceDuringEndGame(data.Value, player);
+                if(actionValid == false){
+                    return BadRequest(new { Error = "Unable to make action." });
+                }
+
+                return Ok(new { Message = "Action completed successfully." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return BadRequest(new { Error = "Unexpected error" });
+            }
+        }
+        
+
+        [HttpPost("SpecialistExtraPhase/{id}")]
+        [Authorize]
+        [PhaseCheckFilter(PhaseType.ChooseSpecialist)]
+        public ActionResult SpecialistExtraPhase(string id, [FromBody] SingleIntModel data)
+        {
+            try
+            {
+                UserModel user = (UserModel)Request.HttpContext.Items["User"]!;
+                var gameContext = (GameContext)Request.HttpContext.Items["GameContext"]!;
+                var player = (PlayerInGame)Request.HttpContext.Items["Player"]!;
+           
+                var actionValid = gameContext.ActionManager.ChooseBonusSpecialistPhase(data.Value, player);
                 if(actionValid == false){
                     return BadRequest(new { Error = "Unable to make action." });
                 }

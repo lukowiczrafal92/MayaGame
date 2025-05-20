@@ -8,6 +8,8 @@ namespace BoardGameBackend.Managers
     {
         public int Id {get; set;} = -1;
         public int Amount {get; set;} = 0;
+        public bool HasLuxury {get; set;} = false;
+        public int AlwaysHasLuxury {get; set;} = 0;
     }
     public class PlayerLuxuries
     {

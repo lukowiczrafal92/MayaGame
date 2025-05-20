@@ -5,7 +5,7 @@ namespace BoardGameFrontend.Models
 {
     public static class GameConstants
     {
-        public const int m_iGameVersion = 4;
+        public const int m_iGameVersion = 5;
         public const int DeityLevelOne = 1;
         public const int DeityLevelTwo = 2;
         public const int DeityLevelThree = 3;

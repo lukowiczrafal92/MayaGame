@@ -5,13 +5,15 @@ namespace BoardGameBackend.Helpers
         private static Dictionary<string, string> jsonDictionary = new Dictionary<string, string>();
         
         private static List<string> ChangelogList = new List<string>(){
-            "Karty ery: 27 (+7).",
-            "Karty wydarzeń: 54 (-1; +3).",
-            "Usunięto akcje: Wojna o trybut, Rozbudowa (rzeźbiarstwo).",
-            "Małe zmiany w akcjach: Wojna (gwiezdna), Wzniesienie Steli i Pielgrzymka.",
-            "Przywrócono poprzednie zasady podboju.",
-            "Usunięto wymagania rozbudowy.",
-            "Zmieniono zasady punktacji za Stolice, Władców oraz Dobra Luksusowe."
+            "Karty ery: 25 (-4; +2).",
+            "Karty wydarzeń: 30 (-27, +3).",
+            "Karty celów: 24 (+24).",
+            "Karty wydarzeń rozdzielone na wydarzenia oraz karty celów (opcjonalne).",
+            "Nowa mechanika punktacji za surowce luksusowe.",
+            "Nowa mechanika stolicy i jej punktacji.",
+            "Zmieniony koszt akcji Gwiazda Władcy (z 4 na (1 + ERA)).",
+            "Akcja Wojny rozdzielona na akcje: Wojna Gwiezdna oraz Podbój. Nowe zasady podboju.",
+            "Interfejs: uproszczony wybór karty władcy."
         };
         static InitJsonManager()
         {   
@@ -35,7 +37,10 @@ namespace BoardGameBackend.Helpers
                 jsonDictionary.Add("ResourceConverters.json", File.ReadAllText(filePath));     
             filePath = "Data/Rulers.json";
             if (File.Exists(filePath))
-                jsonDictionary.Add("Rulers.json", File.ReadAllText(filePath));        
+                jsonDictionary.Add("Rulers.json", File.ReadAllText(filePath));
+            filePath = "Data/Stolice.json";
+            if (File.Exists(filePath))
+                jsonDictionary.Add("Stolice.json", File.ReadAllText(filePath));      
             filePath = "Data/ActionCards.json";
             if (File.Exists(filePath))
                 jsonDictionary.Add("ActionCards.json", File.ReadAllText(filePath));      
