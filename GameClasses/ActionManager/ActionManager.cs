@@ -394,7 +394,7 @@ namespace BoardGameBackend.Managers
                     return false;
 
                 if(af.PassOnAction)
-                    return egd.EffectVal1 == 1;
+                    return egd.EffectVal2 == 1;
 
                 if(af.ActionId != egd.EffectVal1)
                     return false;

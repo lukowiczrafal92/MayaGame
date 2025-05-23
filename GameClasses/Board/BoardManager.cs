@@ -159,7 +159,7 @@ namespace BoardGameBackend.Managers
 
             if(GetCapitalCity(player.Id) == null)
             {
-                if(GetNumCities(player.Id) == 3) // change to 6
+                if(GetNumCities(player.Id) == 6) // change to 6
                 {
                     _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ChooseCapital, ActivePlayers = new List<Guid>(){player.Id}});
                 }
