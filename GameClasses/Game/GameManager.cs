@@ -176,6 +176,9 @@ namespace BoardGameBackend.Managers
                 if(p.Stolica != -1)
                     nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.CapitalCard, Value1 = p.Stolica});
 
+                if(p.bAlreadyConquered)
+                    nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.MarkedAsConquered});
+
                 foreach(var effectid in p.AuraEffects)
                     nSetData.Add(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.AuraEffect, Value1 = effectid});
 

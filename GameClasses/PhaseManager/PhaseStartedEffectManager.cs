@@ -20,7 +20,9 @@ namespace BoardGameBackend.Managers
                 { PhaseType.EndGame, OnEndGame },
                 { PhaseType.PreEndGameChecks, OnPreEndGameChecks },
                 { PhaseType.InGameEvent, OnEventInGame },
-                { PhaseType.SpecialPlayerAction, OnSpecialPlayerActionCheck }
+                { PhaseType.SpecialPlayerAction, OnSpecialPlayerActionCheck },
+                { PhaseType.WarOfStarsInit, OnWarOfStarsInit},
+                { PhaseType.WarOfStarsClear, OnWarOfStarsClear}
             };
         }
         
@@ -30,6 +32,68 @@ namespace BoardGameBackend.Managers
                 triggerActions[phasetype](phase);
         }
 
+        public void OnWarOfStarsClear(Phase? phase)
+        {
+            foreach(var player in _gameContext.PlayerManager.GetPlayersInOrder())
+                player.bAlreadyConquered = false;
+
+            foreach(var tile in _gameContext.BoardManager.Tiles)
+                tile.gameData.JustConquered = false;
+
+            _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.ClearConqueredMarkers, Player = Guid.Empty});
+
+
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
+
+            List<Guid> p = new List<Guid>();
+            foreach(var h in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                _gameContext.PlayerManager.TriggerIncome(h);
+                p.Add(h.Id);
+            }
+
+            if(_gameContext.ActionCardManager.IsThereNeedToSelectActionCards())
+                _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionCardSelection, ActivePlayers = p});
+            
+            foreach(var h in _gameContext.PlayerManager.GetPlayersInReverseOrder())
+            {
+                if(_gameContext.PlayerManager.HasNeedOfExtraConverting(h))
+                    _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.IncomeConverting, ActivePlayers = new List<Guid>(){h.Id}});
+            }
+        }
+
+        public void OnWarOfStarsInit(Phase? phase)
+        {
+            bool bAnyCapital = false;
+            int iNumPlayers = 0;
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                if(_gameContext.BoardManager.GetNumCities(p.Id) == 0)
+                    return;
+
+                if(!bAnyCapital && (_gameContext.BoardManager.GetCapitalCity(p.Id) != null))
+                    bAnyCapital = true;
+
+                iNumPlayers++;
+            }
+            if(!bAnyCapital)
+                return;
+
+            if(iNumPlayers < 2)
+                return;
+
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInReverseOrder())
+                _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.PlayerAction, ActivePlayers = new List<Guid>(){p.Id}, Value1 = 63});
+        }
         public void OnSpecialPlayerActionCheck(Phase? phase)
         {
             var p = _gameContext.PlayerManager.GetPlayersInOrder()[phase.Value2];
@@ -43,6 +107,7 @@ namespace BoardGameBackend.Managers
             _gameContext.PhaseManager.CurrentRound = 0;
 
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.RoundEnd, ActivePlayers = new List<Guid>()});
+        
             _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.RoundStart, ActivePlayers = new List<Guid>()});
             if(_gameContext.GameOptions.AgeCards)
                 _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.InGameEvent, ActivePlayers = new List<Guid>()});
@@ -85,41 +150,17 @@ namespace BoardGameBackend.Managers
         }
         public void OnRoundStart(Phase? phase)
         {
-            // income
+            // new cards
             _gameContext.ActionCardManager.DistributeCards();
             //
             _gameContext.PhaseManager.CurrentRound++;
             _gameContext.PhaseManager.CurrentAction = 0;
+
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.WarOfStarsClear, ActivePlayers = new List<Guid>()});
+            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.WarOfStarsInit, ActivePlayers = new List<Guid>()});
 // TEST
 //_gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.EndGame, ActivePlayers = new List<Guid>()});
 // TEST
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsEnd, ActivePlayers = new List<Guid>()});
-            _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionsStart, ActivePlayers = new List<Guid>()});
-
-
-            List<Guid> p = new List<Guid>();
-            foreach(var h in _gameContext.PlayerManager.GetPlayersInOrder())
-            {
-                _gameContext.PlayerManager.TriggerIncome(h);
-                p.Add(h.Id);
-            }
-
-            if(_gameContext.ActionCardManager.IsThereNeedToSelectActionCards())
-                _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.ActionCardSelection, ActivePlayers = p});
-            
-            foreach(var h in _gameContext.PlayerManager.GetPlayersInReverseOrder())
-            {
-                if(_gameContext.PlayerManager.HasNeedOfExtraConverting(h))
-                    _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.IncomeConverting, ActivePlayers = new List<Guid>(){h.Id}});
-            }
         }
 
         public void OnActionsStart(Phase? phase)

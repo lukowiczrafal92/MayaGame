@@ -20,7 +20,9 @@ namespace BoardGameBackend.Models
         InGameEvent,
         SpecialPlayerAction,
         ChooseCapital,
-        ChooseSpecialist
+        ChooseSpecialist,
+        WarOfStarsInit,
+        WarOfStarsClear
     }
     public class PhaseData
     {

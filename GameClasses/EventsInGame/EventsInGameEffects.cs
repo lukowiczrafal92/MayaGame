@@ -88,6 +88,9 @@ namespace BoardGameBackend.Managers
                 case 61:
                     DoQueueChooseSpecialistPhase(ge);
                     break;
+                case 64: case 65: case 66: case 67: case 68: case 69:
+                    ScoreForCityDeity(ge);
+                    break;
                 default:
                     Console.WriteLine("Missing event handler for " + iKey.ToString());
                     break;
@@ -164,6 +167,40 @@ namespace BoardGameBackend.Managers
                 {
                     if(tile.gameData.OwnerId == p.Id && tile.gameData.RulerStelae != -1)
                         iScore++;
+                }
+                lrow.Value1 = iScore;
+                ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);
+                _gameContext.PlayerManager.ChangeScorePoints(p, iScore, ScorePointType.ErasAndEvents);
+            }
+        }
+        public bool IsTileValidForDeityCity(Tile tile, int deityid)
+        {
+            if(tile.dbData.AdjExtraDeityId == deityid)
+                    return true;
+                
+            foreach(var pTile in _gameContext.BoardManager.GetTilesInRange(tile, 1))
+            {
+                if(pTile.dbData.DeityId == deityid)
+                    return true;
+            }
+            return false;
+        }
+        public void ScoreForCityDeity(GameEventSendData ge)
+        {
+            var dbinfo = GameDataManager.GetEventById(ge.IntValue1);
+            int deityid = dbinfo.EffectVal1;
+            ge.gameEventPlayerTable = new GameEventPlayerTable(){PlayerTableType = PlayerTableType.SimpleScore};
+            foreach(var p in _gameContext.PlayerManager.GetPlayersInOrder())
+            {
+                var lrow = new PlayerTableRow(){Player = p.Id};
+                int iScore = 0;
+                foreach(var tile in _gameContext.BoardManager.Tiles)
+                {
+                    if(tile.gameData.OwnerId == p.Id)
+                    {
+                        if(IsTileValidForDeityCity(tile, deityid))
+                            iScore++;
+                    }
                 }
                 lrow.Value1 = iScore;
                 ge.gameEventPlayerTable.ListPlayerRows.Add(lrow);

@@ -17,5 +17,6 @@ namespace BoardGameBackend.Models
         public int AuraEffectId;
         public int Angle;
         public bool ComboScore;
+        public bool EndGameDeity;
     }
 }

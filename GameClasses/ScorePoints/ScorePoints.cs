@@ -155,6 +155,9 @@ namespace BoardGameBackend.Managers
                         else
                             iScoreFromRulers += 1;
                     }
+
+                    foreach(var ruler in p.Rulers.Where(r => r.dbInfo.EndGameDeity))
+                        iScoreFromRulers += p.PlayerDeities.GetDeityById(ruler.dbInfo.DeityId).Level;
                 }
 
                 // end resource score also from rulers
@@ -162,9 +165,17 @@ namespace BoardGameBackend.Managers
                 {
                     if(resource.EndGameScore > 0)
                     {
-                        int iScore = (resource.Amount * resource.EndGameScore) / 100;
-                        if(iScore > 0)
-                            iScoreFromRulers += iScore;
+                        // wersja 6
+                        if(resource.Amount >= 6)
+                            iScoreFromRulers += 3;
+                        else if(resource.Amount >= 3)
+                            iScoreFromRulers += 2;
+                        else if(resource.Amount >= 1)
+                            iScoreFromRulers += 1;
+
+                        //int iScore = (resource.Amount * resource.EndGameScore) / 100;
+                        //if(iScore > 0)
+                        //   iScoreFromRulers += iScore;
                     }
                 }
 

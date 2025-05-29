@@ -17,5 +17,6 @@ namespace BoardGameBackend.Models
         public Guid OwnerId {get; set;} = Guid.Empty;
         public int Level {get; set;} = 0;
         public int RulerStelae {get; set;} = -1;
+        public bool JustConquered {get; set;} = false;
     }
 }

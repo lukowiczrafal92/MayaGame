@@ -31,7 +31,9 @@ namespace BoardGameBackend.Models
         HasLuxury,
         ClearLuxury,
         GameLuxuryBonus,
-        CapitalCard
+        CapitalCard,
+        MarkedAsConquered,
+        ClearConqueredMarkers
     }
 
     public enum PlayerTableType

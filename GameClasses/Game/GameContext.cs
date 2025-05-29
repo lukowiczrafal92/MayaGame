@@ -91,6 +91,8 @@ namespace BoardGameBackend.Managers
                         RulerCardsManager.PlayerBackupRulerCard(_player, action.Value1);
                     else if(action.DataType == PlayerBasicSetDataType.CapitalCard)
                         _player.Stolica = action.Value1;
+                    else if(action.DataType == PlayerBasicSetDataType.MarkedAsConquered)
+                        _player.bAlreadyConquered = true;
                     else if(action.DataType == PlayerBasicSetDataType.ScorePoints)
                         _player.Points = action.Value1;
                     else if(action.DataType == PlayerBasicSetDataType.WarfareScore)

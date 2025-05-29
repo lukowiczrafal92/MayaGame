@@ -27,7 +27,12 @@ namespace BoardGameBackend.Managers
             if(dbEventInfo.EffectVal1 == (int) ActionTypes.PILGRIMAGE)
                 return HasPlayerAtLeastOneCity(player.Id);
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.FOUND_CITY)
+            {
+                if(_gameContext.BoardManager.GetCapitalCity(player.Id) != null)
+                    return false;
+
                 return HasAnyValidTileCity(player.Id, false, false, true, !IsCurrentEraId(10));
+            }
             else if(dbEventInfo.EffectVal1 == (int) ActionTypes.ERECT_STELAE)
             {
                 if(!HasPlayerAtLeastOneCity(player.Id))
@@ -203,7 +208,9 @@ namespace BoardGameBackend.Managers
             if(tile.gameData.OwnerId == Guid.Empty)
                 return false;
 
-            var targetplayer = _gameContext.PlayerManager.GetPlayerById(tile.gameData.OwnerId);
+            return tile.gameData.OwnerId != player.Id;
+
+        /*    var targetplayer = _gameContext.PlayerManager.GetPlayerById(tile.gameData.OwnerId);
             foreach(var deity in targetplayer.PlayerDeities.Deities)
             {
                 if(deity.Level > player.PlayerDeities.GetDeityById(deity.Id).Level)
@@ -216,12 +223,12 @@ namespace BoardGameBackend.Managers
                     return true;
             }
 
-        /*    if(_gameContext.ActionManager.CanConquerEnemyCity(targetplayer.Id, player.Id))
+           if(_gameContext.ActionManager.CanConquerEnemyCity(targetplayer.Id, player.Id))
             {
                 if(tile.gameData.Level == 0)
                     return true;
-            } */
-            return false;
+            } 
+            return false; */
         }
     }
 }

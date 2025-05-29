@@ -14,7 +14,7 @@ namespace BoardGameBackend.Managers
         private List<GameEventSendData> gameEvents = new List<GameEventSendData>();
         private List<ActionTypes> JokerEnabledActions = new List<ActionTypes>(){
         //    ActionTypes.WAR_TRIBUTE,
-            ActionTypes.WAR_CONQUEST,
+        //    ActionTypes.WAR_CONQUEST,
             ActionTypes.WAR_STAR,
             ActionTypes.FOUND_CITY,
             ActionTypes.SKY_OBSERVATION,
@@ -41,7 +41,7 @@ namespace BoardGameBackend.Managers
         };
         private List<ActionTypes> CityCardEnemy = new List<ActionTypes>(){
         //    ActionTypes.WAR_TRIBUTE,
-            ActionTypes.WAR_CONQUEST,
+        //    ActionTypes.WAR_CONQUEST,
             ActionTypes.WAR_STAR,
             ActionTypes.ERA_MERCENARIES,
             ActionTypes.TRADE_POINTS,
@@ -70,7 +70,7 @@ namespace BoardGameBackend.Managers
         };
         private List<ActionTypes> ActionCardWar = new List<ActionTypes>(){
         //    ActionTypes.WAR_TRIBUTE,
-            ActionTypes.WAR_CONQUEST,
+        //    ActionTypes.WAR_CONQUEST,
             ActionTypes.WAR_STAR,
             ActionTypes.RECRUIT_WARRIORS
         };
@@ -580,6 +580,9 @@ namespace BoardGameBackend.Managers
                 }
                 else if(af.ActionId == (int) ActionTypes.FOUND_CITY)
                 {
+                    if(_gameContext.BoardManager.GetNumCities(player.Id) >= 6)
+                        return false;
+
                     if(tile.gameData.OwnerId != Guid.Empty)
                         return false;
 
@@ -677,13 +680,16 @@ namespace BoardGameBackend.Managers
                     if(seconplayerid == player.Id || seconplayerid == Guid.Empty)
                         return false;
 
-                    if((actionCardId == 6 || af.Joker || bEventCard) && !IsCurrentEraId(10))
+                /*    if((actionCardId == 6 || af.Joker || bEventCard) && !IsCurrentEraId(10))
                     {
                         if(!HasAdjacentCity(tile, player.Id))
                             return false;
-                    }
+                    } */
 
                     if(tile.gameData.Level > 0)
+                        return false;
+
+                    if(tile.gameData.JustConquered)
                         return false;
 
                     if(!CanConquerEnemyCity(seconplayerid, player.Id))
@@ -707,8 +713,18 @@ namespace BoardGameBackend.Managers
                         if(!HasAdjacentCity(tile, player.Id))
                             return false;
                     }
+                    
+                    if(af.Resource1Id == -1)
+                        return false;
+                    
+                    if(tile.dbData.Resource1 != af.Resource1Id && tile.dbData.Resource2 != af.Resource1Id)
+                        return false;
 
-
+                    if(af.ExtraInfoTypeId == 7)
+                    {
+                        if(tile.dbData.Resource1 != af.ExtraInfoId && tile.dbData.Resource2 != af.ExtraInfoId)
+                            return false;
+                    }
                 //    if(tile.gameData.Level == 0)
                 //        return false;
                 }
@@ -767,7 +783,15 @@ namespace BoardGameBackend.Managers
                 {
                     // always fine
                 }
-                else
+                else if(af.ExtraInfoTypeId == 6)
+                {
+                    // always fine
+                }
+                else if(af.ExtraInfoTypeId == 7)
+                {
+                    // checked on tile
+                }
+                else 
                     return false;
 
         /*        else if(af.ExtraInfoTypeId == 4)
@@ -968,11 +992,14 @@ namespace BoardGameBackend.Managers
             else if(af.ActionId == (int) ActionTypes.WAR_CONQUEST)
             {
                 Tile tile = _gameContext.BoardManager.GetTileById(af.TileId);
-                PlayerInGame ConqueredPlayed = _gameContext.PlayerManager.GetPlayerById(tile.gameData.OwnerId);
-                _gameContext.PlayerManager.ChangeResourceAmount(ConqueredPlayed, tile.dbData.Resource1, 1);
-                _gameContext.PlayerManager.ChangeResourceAmount(ConqueredPlayed, tile.dbData.Resource2, 1);
-                if(_gameContext.PlayerManager.HasNeedOfExtraConverting(ConqueredPlayed))
-                    _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.IncomeConverting, ActivePlayers = new List<Guid>(){ConqueredPlayed.Id}});
+                PlayerInGame ConqueredPlayer = _gameContext.PlayerManager.GetPlayerById(tile.gameData.OwnerId);
+                ConqueredPlayer.bAlreadyConquered = true;
+                AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.MarkedAsConquered, Player = ConqueredPlayer.Id});
+                AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.MarkedAsConquered, Player = Guid.Empty, Value1 = af.TileId});
+            //    _gameContext.PlayerManager.ChangeResourceAmount(ConqueredPlayer, tile.dbData.Resource1, 1);
+            //    _gameContext.PlayerManager.ChangeResourceAmount(ConqueredPlayer, tile.dbData.Resource2, 1);
+            //    if(_gameContext.PlayerManager.HasNeedOfExtraConverting(ConqueredPlayer))
+            //        _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.IncomeConverting, ActivePlayers = new List<Guid>(){ConqueredPlayed.Id}});
                 
                 _gameContext.BoardManager.CityFoundOrConquest(player, af.TileId);
 //                _gameContext.PlayerManager.ChangeWarfareScore(player, GetWarfareScoreFromConquest());
@@ -983,6 +1010,7 @@ namespace BoardGameBackend.Managers
             }
             else if(af.ActionId == (int) ActionTypes.WAR_STAR)
             {
+                _gameContext.PlayerManager.ChangeResourceAmount(player, af.Resource1Id, 1);
                 if(af.ExtraInfoTypeId == 1)
                 {
                     _gameContext.PlayerManager.IncreaseDeityLevel(player, af.ExtraInfoId);
@@ -1008,6 +1036,14 @@ namespace BoardGameBackend.Managers
                         _gameContext.PhaseManager.PhaseQueue.Insert(1, new Phase(){PhaseType = PhaseType.IncomeConverting, ActivePlayers = new List<Guid>(){ConqueredPlayed.Id}});
                 
                     _gameContext.BoardManager.CityFoundOrConquest(player, af.TileId);
+                }
+                else if(af.ExtraInfoTypeId == 6)
+                {
+                    _gameContext.PlayerManager.SetHasLuxury(player, af.ExtraInfoId);
+                }
+                else if(af.ExtraInfoTypeId == 7)
+                {
+                    _gameContext.PlayerManager.ChangeResourceAmount(player, af.ExtraInfoId, 1);
                 }
 
                 if(IsCurrentEraId(17))
@@ -1057,9 +1093,12 @@ namespace BoardGameBackend.Managers
             var actionInfo = GameDataManager.GetActionById(af.ActionId);
             if((af.TileId != -1) && actionInfo.RequiresLocation)
             {
-                int tileResource = _gameContext.BoardManager.GetTileById(af.TileId).dbData.LuxuryId;
-                _gameContext.PlayerManager.SetHasLuxury(player, tileResource);
-                _gameContext.PlayerManager.CheckIfHasLuxuryComplete(player);
+                if(af.ActionId != (int) ActionTypes.WAR_CONQUEST)
+                {
+                    int tileResource = _gameContext.BoardManager.GetTileById(af.TileId).dbData.LuxuryId;
+                    _gameContext.PlayerManager.SetHasLuxury(player, tileResource);
+                    _gameContext.PlayerManager.CheckIfHasLuxuryComplete(player);
+                }
             }
 
             _gameContext.PhaseManager.PlayerFinishedCurrentPhase(player);
@@ -1226,7 +1265,10 @@ namespace BoardGameBackend.Managers
             if(targetplayer == attackingplayer)
                 return false;
 
-            int numcities = _gameContext.BoardManager.GetNumCities(targetplayer);
+            if(_gameContext.PlayerManager.GetPlayerById(targetplayer).bAlreadyConquered)
+                return false;
+
+/*            int numcities = _gameContext.BoardManager.GetNumCities(targetplayer);
             foreach(var tsp in _gameContext.PlayerManager.Players)
             {
                 if(tsp.Id != attackingplayer)
@@ -1243,7 +1285,7 @@ namespace BoardGameBackend.Managers
                 return false;
 
             if(_gameContext.BoardManager.IsThereAtLeastOneNeutralCityLocation())
-                return false;
+                return false; */
 
 //            return _gameContext.BoardManager.GetNumCities(attackingplayer) < numcities;
             return true;

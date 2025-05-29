@@ -5,15 +5,13 @@ namespace BoardGameBackend.Helpers
         private static Dictionary<string, string> jsonDictionary = new Dictionary<string, string>();
         
         private static List<string> ChangelogList = new List<string>(){
-            "Karty ery: 25 (-4; +2).",
-            "Karty wydarzeń: 30 (-27, +3).",
-            "Karty celów: 24 (+24).",
-            "Karty wydarzeń rozdzielone na wydarzenia oraz karty celów (opcjonalne).",
-            "Nowa mechanika punktacji za surowce luksusowe.",
-            "Nowa mechanika stolicy i jej punktacji.",
-            "Zmieniony koszt akcji Gwiazda Władcy (z 4 na (1 + ERA)).",
-            "Akcja Wojny rozdzielona na akcje: Wojna Gwiezdna oraz Podbój. Nowe zasady podboju.",
-            "Interfejs: uproszczony wybór karty władcy."
+            "Karty ery: 25.",
+            "Karty wydarzeń: 30.",
+            "Karty celów: 30 (+6).",
+            "Balans umiejętności kart władców. Każdy władcy oznacza jednorazowo wskazane dobro luksusowe.",
+            "Nie można zakładać miast jeżeli już się posiada 6.",
+            "Akcja podboju usunięta. Akcja wojny przebalansowana.",
+            "Nowa faza na koniec rundy: Podbój (po aktualizacji kolejności, przed wydarzeniami/celami)."
         };
         static InitJsonManager()
         {   
