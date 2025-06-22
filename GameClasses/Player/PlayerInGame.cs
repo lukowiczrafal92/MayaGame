@@ -28,6 +28,7 @@ namespace BoardGameBackend.Models
         public List<ActionCard> ReserveActionCards = new List<ActionCard>();
         public List<RulerCard> Rulers = new List<RulerCard>();
         public int Stolica = -1;
+        public int StolicaExtraReward = -1;
         public bool bAlreadyConquered = false;
         public PlayerInGame(Player player)
         {

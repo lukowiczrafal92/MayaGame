@@ -178,11 +178,9 @@ namespace BoardGameBackend.Managers
             if(tile.dbData.AdjExtraDeityId == deityid)
                     return true;
                 
-            foreach(var pTile in _gameContext.BoardManager.GetTilesInRange(tile, 1))
-            {
-                if(pTile.dbData.DeityId == deityid)
-                    return true;
-            }
+            if(tile.dbData.AdjDeityId == deityid)
+                return true;
+                
             return false;
         }
         public void ScoreForCityDeity(GameEventSendData ge)

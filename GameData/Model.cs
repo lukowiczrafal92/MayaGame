@@ -46,5 +46,6 @@ namespace BoardGameBackend.Models
         public int Resource2 {get; set;}
         public int LuxuryId {get; set;}
         public int AdjExtraDeityId {get; set;}
+        public int AdjDeityId {get; set;}
     }
 }

@@ -6,12 +6,10 @@ namespace BoardGameBackend.Helpers
         
         private static List<string> ChangelogList = new List<string>(){
             "Karty ery: 25.",
-            "Karty wydarzeń: 30.",
-            "Karty celów: 30 (+6).",
-            "Balans umiejętności kart władców. Każdy władcy oznacza jednorazowo wskazane dobro luksusowe.",
-            "Nie można zakładać miast jeżeli już się posiada 6.",
-            "Akcja podboju usunięta. Akcja wojny przebalansowana.",
-            "Nowa faza na koniec rundy: Podbój (po aktualizacji kolejności, przed wydarzeniami/celami)."
+            "Karty wydarzeń: 29 (-1).",
+            "Karty celów: 29 (-1).",
+            "Rozbudowa ma teraz dodatkowy bonus definiowany przez kartę stolicy (+1 specjalista lub +1 dobro luksusowe).",
+            "3 poziom religii jest teraz efektem natychmiastowym (jednorazowo oznacza surowiec luksusowy zamiast dostarczać stałe źródło). Nie ma już stałych źródeł surowców.",
         };
         static InitJsonManager()
         {   

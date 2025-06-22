@@ -8,5 +8,6 @@ namespace BoardGameBackend.Models
     {
         public int Id;
         public int ConverterId;
+        public int ExtraReward;
     }
 }

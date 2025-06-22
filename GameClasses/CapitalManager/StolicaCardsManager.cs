@@ -47,6 +47,7 @@ namespace BoardGameBackend.Managers
                 _availablepool.Clear();
 
             player.Stolica = card.dbInfo.Id;
+            player.StolicaExtraReward = card.dbInfo.ExtraReward;
             _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){DataType = PlayerBasicSetDataType.CapitalCard, Player = player.Id, Value1 = card.dbInfo.Id, Value2 = 1});
         
             if(card.dbInfo.ConverterId != -1)

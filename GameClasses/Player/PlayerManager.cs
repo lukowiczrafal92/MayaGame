@@ -204,14 +204,14 @@ namespace BoardGameBackend.Managers
             var d1 = p.PlayerDeities.GetDeityById(iDeityOne);
             var d2 = p.PlayerDeities.GetDeityById(iDeityTwo);
             bool bCheckResources = false;
-            foreach(var l in p.PlayerLuxuries.Luxuries)
+        /*    foreach(var l in p.PlayerLuxuries.Luxuries)
             {
                 if(!l.HasLuxury)
                     bCheckResources = true;
-            }
+            } */
             int iLevel1 = d1.Level;
             int iLevel2 = d2.Level;
-            if(iLevel1 == 3)
+        /*    if(iLevel1 == 3)
             {
                 SetHasLuxuryAlways(p, d1.Luxury, -1);
                 SetHasLuxuryAlways(p, d2.Luxury, 1);
@@ -224,7 +224,7 @@ namespace BoardGameBackend.Managers
                 SetHasLuxuryAlways(p, d2.Luxury, -1);
                 if(bCheckResources)
                     CheckIfHasLuxuryComplete(p);
-            }
+            } */
             d1.Level = iLevel2;
             d2.Level = iLevel1;
 
@@ -244,7 +244,7 @@ namespace BoardGameBackend.Managers
                 if(deity.Level == 1)
                     ChangeResourceAmount(p, deity.Resource, 1);
                 else if(deity.Level == 3)
-                    SetHasLuxuryAlways(p, deity.Luxury, 1);
+                    SetHasLuxury(p, deity.Luxury);
                     
                 _gameContext.ActionManager.AddPlayerBasicSetData(new PlayerBasicSetData(){Player = p.Id, DataType = PlayerBasicSetDataType.DeityLevel, Value1 = iDeityID, Value2 = p.PlayerDeities.GetDeityById(iDeityID).Level});
             }         

@@ -1,4 +1,10 @@
-[{"Id" : 1, "TileType" : "TILE_ALTAR"},
-{"Id" : 2, "TileType" : "TILE_DEITY"},
-{"Id" : 3, "TileType" : "TILE_CITY"},
-{"Id" : 4, "TileType" : "TILE_CENTER"}]
+[{"Id" : 1, "TileType" : "TILE_ALTAR", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 7, "Rotate" : false},
+{"Id" : 2, "TileType" : "TILE_DEITY", "IconAtlas" : "", "IconIndex" : -1, "Rotate" : false},
+{"Id" : 3, "TileType" : "TILE_CITY", "IconAtlas" : "", "IconIndex" : -1, "Rotate" : false},
+{"Id" : 4, "TileType" : "TILE_CENTER", "IconAtlas" : "ATLAS_BOARD_1", "IconIndex" : 9, "Rotate" : true},
+{"Id" : 5, "TileType" : "TILE_DEITY_BULUC", "IconAtlas" : "ATLAS_BOARD_2", "IconIndex" : 0, "Rotate" : true},
+{"Id" : 6, "TileType" : "TILE_DEITY_KAWAII", "IconAtlas" : "ATLAS_BOARD_2", "IconIndex" : 1, "Rotate" : true},
+{"Id" : 7, "TileType" : "TILE_DEITY_ITZAMNA", "IconAtlas" : "ATLAS_BOARD_2", "IconIndex" : 2, "Rotate" : true},
+{"Id" : 8, "TileType" : "TILE_DEITY_EK_CHUAH", "IconAtlas" : "ATLAS_BOARD_2", "IconIndex" : 3, "Rotate" : true},
+{"Id" : 9, "TileType" : "TILE_DEITY_ITZEL", "IconAtlas" : "ATLAS_BOARD_2", "IconIndex" : 4, "Rotate" : true},
+{"Id" : 10, "TileType" : "TILE_DEITY_CHAAK", "IconAtlas" : "ATLAS_BOARD_2", "IconIndex" : 5, "Rotate" : true}]

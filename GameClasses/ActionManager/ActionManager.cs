@@ -361,13 +361,15 @@ namespace BoardGameBackend.Managers
             if(tile.dbData.AdjExtraDeityId == deityid)
                 return true;
             
-            foreach(var pTile in _gameContext.BoardManager.GetTilesInRange(tile, 1))
+            if(tile.dbData.AdjDeityId == deityid)
+                return true;
+       /*     foreach(var pTile in _gameContext.BoardManager.GetTilesInRange(tile, 1))
             {
                 if(pTile.dbData.DeityId == deityid)
                     return true;
                 else if(pTile.dbData.TileTypeId == 1 && player.PlayerDeities.GetDeityById(deityid).Level >= 2)
                     return true;
-            }
+            } */
             Console.WriteLine("Bóstwo nie jest valid! {0}, {1}", tileid, deityid);
             return false;
         }
@@ -614,6 +616,12 @@ namespace BoardGameBackend.Managers
                         return false;
                     
                     if(tile.gameData.Level == 0) // && (_gameContext.BoardManager.GetCapitalCity(player.Id) != null))
+                        return false;
+
+                    if(af.ExtraInfoId < 1 || af.ExtraInfoId > 6)
+                        return false;
+
+                    if(player.StolicaExtraReward == -1)
                         return false;
                 }
                 else if(af.ActionId == (int) ActionTypes.CITY_EXPAND_CARVERS)
@@ -875,7 +883,7 @@ namespace BoardGameBackend.Managers
                 _gameContext.PhaseManager.PlayerFinishedCurrentPhase(player);
                 return;
             }
-
+            bool bIgnoreLog = false;
             player.LogAction((ActionTypes) af.ActionId);
 
             if(af.ActionId == (int) ActionTypes.DISCARD_CARD)
@@ -910,6 +918,14 @@ namespace BoardGameBackend.Managers
             else if(af.ActionId == (int) ActionTypes.CITY_EXPAND)
             {
                 _gameContext.BoardManager.CityExpands(player, af.TileId);
+                if(player.StolicaExtraReward == 1)
+                {
+                    _gameContext.PlayerManager.ChangeResourceAmount(player, af.ExtraInfoId, 1);
+                }
+                else
+                {
+                    _gameContext.PlayerManager.SetHasLuxury(player, af.ExtraInfoId);
+                }
             }
             else if(af.ActionId == (int) ActionTypes.CITY_EXPAND_CARVERS)
             {
@@ -991,6 +1007,7 @@ namespace BoardGameBackend.Managers
             }
             else if(af.ActionId == (int) ActionTypes.WAR_CONQUEST)
             {
+                bIgnoreLog = true;
                 Tile tile = _gameContext.BoardManager.GetTileById(af.TileId);
                 PlayerInGame ConqueredPlayer = _gameContext.PlayerManager.GetPlayerById(tile.gameData.OwnerId);
                 ConqueredPlayer.bAlreadyConquered = true;
@@ -1081,7 +1098,8 @@ namespace BoardGameBackend.Managers
                     _gameContext.PlayerManager.ChangeScorePoints(player, iPoints, ScorePointType.ErasAndEvents);
             }
             
-            ConvertFormIntoActionLog(player, af);
+            if(!bIgnoreLog)
+                ConvertFormIntoActionLog(player, af);
     
             if(af.CardId != -1)
                 _gameContext.PlayerManager.UsedActionCardFromHand(player, af.CardId);

@@ -90,7 +90,10 @@ namespace BoardGameBackend.Managers
                     else if(action.DataType == PlayerBasicSetDataType.RulerCard)
                         RulerCardsManager.PlayerBackupRulerCard(_player, action.Value1);
                     else if(action.DataType == PlayerBasicSetDataType.CapitalCard)
+                    {
                         _player.Stolica = action.Value1;
+                        _player.StolicaExtraReward = GameDataManager.GetStolicaById(action.Value1).ExtraReward;  
+                    }
                     else if(action.DataType == PlayerBasicSetDataType.MarkedAsConquered)
                         _player.bAlreadyConquered = true;
                     else if(action.DataType == PlayerBasicSetDataType.ScorePoints)
